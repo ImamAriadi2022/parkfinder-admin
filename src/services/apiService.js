@@ -2,7 +2,7 @@
 // All API calls centralized here
 
 // const API_BASE_URL = 'https://backend-api-services-291631508657.asia-southeast2.run.app';
-const BASE_URL = 'https://backend-api-services-173368161554.asia-southeast2.run.app';
+const API_BASE_URL = 'https://backend-api-services-173368161554.asia-southeast2.run.app';
 
 // Get token from localStorage
 const getToken = () => localStorage.getItem('pf_token');
