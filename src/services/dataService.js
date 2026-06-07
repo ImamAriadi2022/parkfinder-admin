@@ -45,25 +45,88 @@ export const getParkingById = async (parkingId, useAPI = false) => {
 
 // ─── User Data ─────────────────────────────────────
 export const getUsers = async (useAPI = false) => {
+  // First, map guest users using guest bookings from the BOOKINGS list
+  const guestUsers = USERS.filter(u => u.platform === 'web').map(u => {
+    const matchBooking = BOOKINGS.find(b => b.userId === u.id);
+    return {
+      ...u,
+      name: matchBooking ? matchBooking.userName : (u.name || 'Tamu'),
+      phone: matchBooking ? matchBooking.userPhone : (u.phone || ''),
+    };
+  });
+
   if (useAPI) {
     try {
-      return await userService.getAll();
+      const res = await userService.getAll();
+      const list = res.data?.users || res.users || res || [];
+      const apiUsers = list.map(u => ({
+        id: u.userId || u.id,
+        name: u.name || 'User',
+        email: u.email || '',
+        phone: u.phoneNumber || u.phone || '',
+        plate: u.vehicles?.[0]?.plateNumber || u.plate || '—',
+        platform: u.platform || 'mobile',
+        totalBookings: u.totalBookings || 0,
+        activeBookings: u.activeTicketId ? 1 : (u.activeBookings || 0),
+        joinDate: u.createdAt || u.joinDate || '',
+        lastActive: u.createdAt || u.lastActive || '',
+        status: u.status || 'active',
+      }));
+      return [...apiUsers, ...guestUsers];
     } catch (error) {
       console.warn('User API failed, using mock data:', error);
     }
   }
-  return USERS;
+  return USERS.map(u => {
+    if (u.platform === 'web') {
+      const matchBooking = BOOKINGS.find(b => b.userId === u.id);
+      return {
+        ...u,
+        name: matchBooking ? matchBooking.userName : (u.name || 'Tamu'),
+        phone: matchBooking ? matchBooking.userPhone : (u.phone || ''),
+      };
+    }
+    return u;
+  });
 };
 
 export const getUserById = async (userId, useAPI = false) => {
   if (useAPI) {
     try {
-      return await userService.getById(userId);
+      const res = await userService.getById(userId);
+      const u = res.data || res;
+      if (u) {
+        return {
+          id: u.userId || u.id,
+          name: u.name || 'User',
+          email: u.email || '',
+          phone: u.phoneNumber || u.phone || '',
+          plate: u.vehicles?.[0]?.plateNumber || u.plate || '—',
+          platform: u.platform || 'mobile',
+          totalBookings: u.totalBookings || 0,
+          activeBookings: u.activeTicketId ? 1 : (u.activeBookings || 0),
+          joinDate: u.createdAt || u.joinDate || '',
+          lastActive: u.createdAt || u.lastActive || '',
+          status: u.status || 'active',
+        };
+      }
     } catch (error) {
       console.warn('User API failed, using mock data:', error);
     }
   }
-  return USERS.find(u => u.id === userId);
+  const u = USERS.find(usr => usr.id === userId);
+  if (u) {
+    if (u.platform === 'web') {
+      const matchBooking = BOOKINGS.find(b => b.userId === u.id);
+      return {
+        ...u,
+        name: matchBooking ? matchBooking.userName : (u.name || 'Tamu'),
+        phone: matchBooking ? matchBooking.userPhone : (u.phone || ''),
+      };
+    }
+    return u;
+  }
+  return null;
 };
 
 // ─── Dashboard Stats ──────────────────────────────

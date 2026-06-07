@@ -55,11 +55,11 @@ function AppRoutes() {
       <Route path="/" element={<RequireAuth><AdminLayout><Dashboard /></AdminLayout></RequireAuth>} />
       <Route path="/parkings" element={<RequireAuth><AdminLayout><ParkingsPage /></AdminLayout></RequireAuth>} />
       <Route path="/profile" element={<RequireAuth><AdminLayout><ProfilePage /></AdminLayout></RequireAuth>} />
-      <Route path="/staff" element={<RequireSuperAdmin><AdminLayout><StaffManagementPage /></AdminLayout></RequireSuperAdmin>} />
+      <Route path="/staff" element={<RequireSuperAdmin><AdminLayout><AdminsPage /></AdminLayout></RequireSuperAdmin>} />
       <Route path="/users" element={<RequireSuperAdmin><AdminLayout><UsersPage /></AdminLayout></RequireSuperAdmin>} />
 
       {/* SuperAdmin-only routes */}
-      <Route path="/admins" element={<RequireSuperAdmin><AdminLayout><AdminsPage /></AdminLayout></RequireSuperAdmin>} />
+      <Route path="/admins" element={<RequireSuperAdmin><AdminLayout><Navigate to="/staff" replace /></AdminLayout></RequireSuperAdmin>} />
 
       {/* Fallback */}
       <Route path="*" element={

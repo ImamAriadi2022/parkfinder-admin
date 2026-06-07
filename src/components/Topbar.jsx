@@ -12,7 +12,7 @@ const PAGE_TITLES = {
   '/scans':             { title: 'Log Scan QR',         sub: 'Riwayat scan tiket parkir' },
   '/swaps':             { title: 'Tukar Slot',          sub: 'Monitor permintaan penukaran slot' },
   '/analytics':         { title: 'Analitik & Statistik', sub: 'Insight performa sistem parkir' },
-  '/staff-management':  { title: 'Manajemen Staff',    sub: 'Kelola petugas monitoring gedung parkir' },
+  '/staff':             { title: 'Staff Parkir',       sub: 'Kelola petugas monitoring gedung parkir' },
   '/settings':          { title: 'Pengaturan',          sub: 'Konfigurasi sistem admin' },
 }
 

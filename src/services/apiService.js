@@ -52,10 +52,15 @@ export const adminService = {
     fetchAPI('GET', `/superAdmin/admins/${adminId}`),
   
   create: (name, email, password, areaId) =>
-    fetchAPI('POST', '/superAdmin/admins', { name, email, password, areaId }),
+    fetchAPI('POST', '/superAdmin/admins', { name, email, password, areaId, managedAreaId: areaId }),
   
-  update: (adminId, data) =>
-    fetchAPI('PUT', `/superAdmin/admins/${adminId}`, data),
+  update: (adminId, data) => {
+    const payload = { ...data };
+    if (payload.areaId) {
+      payload.managedAreaId = payload.areaId;
+    }
+    return fetchAPI('PUT', `/superAdmin/admins/${adminId}`, payload);
+  },
   
   delete: (adminId) =>
     fetchAPI('DELETE', `/superAdmin/admins/${adminId}`),
@@ -123,10 +128,9 @@ export const slotService = {
   add: (areaId, floor, slotName, sensorId, status = 'available') =>
     fetchAPI('POST', '/areas/slots', { areaId, floor, slotName, sensorId, status }),
 
-  // PUT /areas/slots/{slotId} — update slot status (super admin)
-  // Body: { appStatus }
-  update: (slotId, appStatus) =>
-    fetchAPI('PUT', `/areas/slots/${slotId}`, { appStatus }),
+  // PUT /areas/slots/{slotId} — update slot status
+  update: (slotId, data) =>
+    fetchAPI('PUT', `/areas/slots/${slotId}`, typeof data === 'string' ? { appStatus: data } : data),
 
   delete: (slotId) =>
     fetchAPI('DELETE', `/areas/slots/${slotId}`),

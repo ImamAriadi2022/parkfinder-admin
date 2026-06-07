@@ -15,10 +15,12 @@ export default function ParkingsPage() {
   const [showAddArea, setShowAddArea] = useState(false)
   const [showEditArea, setShowEditArea] = useState(null)
   const [showAddSlot, setShowAddSlot] = useState(false)
+  const [showEditSlot, setShowEditSlot] = useState(null)
 
   // Forms
   const [areaForm, setAreaForm] = useState({ name: '', address: '', totalFloors: '', contactEmail: '', isActive: true })
   const [slotForm, setSlotForm] = useState({ floor: '', slotName: '', status: 'available' })
+  const [editSlotForm, setEditSlotForm] = useState({ floor: '', slotName: '', status: 'available' })
   const [saving, setSaving] = useState(false)
 
   const generateSensorId = (area, floor, slotName) => {
@@ -42,6 +44,7 @@ export default function ParkingsPage() {
     user?.parkingId ||
     user?.assignedAreaId ||
     user?.adminAreaId ||
+    user?.managedAreaId ||
     ''
 
   const isAssignedArea = (area) => {
@@ -93,7 +96,7 @@ export default function ParkingsPage() {
     }
   }
 
-  useEffect(() => { fetchAreas() }, [isSuperAdmin, user?.areaId, user?.parkingId, user?.parkingName])
+  useEffect(() => { fetchAreas() }, [isSuperAdmin, user?.areaId, user?.parkingId, user?.managedAreaId, user?.parkingName])
 
   useEffect(() => {
     if (selectedArea?.id) fetchSlots(selectedArea.id)
@@ -198,6 +201,34 @@ export default function ParkingsPage() {
     finally { setSaving(false) }
   }
 
+  const handleEditSlot = async (e) => {
+    e.preventDefault()
+    if (!editSlotForm.floor) {
+      alert('Floor wajib diisi.')
+      return
+    }
+    if (!editSlotForm.slotName.trim()) {
+      alert('Nama slot wajib diisi.')
+      return
+    }
+    setSaving(true)
+    try {
+      await slotService.update(showEditSlot.id, {
+        floor: Number(editSlotForm.floor),
+        slotName: editSlotForm.slotName.trim(),
+        appStatus: editSlotForm.status,
+      })
+      setShowEditSlot(null)
+      setEditSlotForm({ floor: '', slotName: '', status: 'available' })
+      fetchSlots(selectedArea.id)
+      fetchAreas()
+    } catch (err) {
+      alert(err.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
   const handleDeleteSlot = async (slotId) => {
     if (!confirm('Yakin hapus slot ini?')) return
     try {
@@ -227,7 +258,8 @@ export default function ParkingsPage() {
   }
 
   return (
-    <div className="animate-fade-up">
+    <>
+      <div className="animate-fade-up">
       {/* Header */}
       <div className="page-header">
         <div>
@@ -331,16 +363,29 @@ export default function ParkingsPage() {
                         <td>{getStatusBadge(slot.status || slot.appStatus)}</td>
                         <td>
                           <div style={{ display: 'flex', gap: 4 }}>
-                            {isSuperAdmin && (slot.status === 'available' || slot.appStatus === 'available') && (
+                            {(slot.status === 'available' || slot.appStatus === 'available') && (
                               <button className="btn btn-ghost btn-sm" onClick={() => handleUpdateSlotStatus(slot, 'maintenance')}>
                                 Maintenance
                               </button>
                             )}
-                            {isSuperAdmin && (slot.status === 'maintenance' || slot.appStatus === 'maintenance') && (
+                            {(slot.status === 'maintenance' || slot.appStatus === 'maintenance') && (
                               <button className="btn btn-ghost btn-sm" onClick={() => handleUpdateSlotStatus(slot, 'available')}>
                                 Aktifkan
                               </button>
                             )}
+                            <button
+                              className="btn btn-ghost btn-sm"
+                              onClick={() => {
+                                setEditSlotForm({
+                                  floor: slot.floor || '',
+                                  slotName: slot.slotNumber || slot.slotName || '',
+                                  status: slot.status || slot.appStatus || 'available'
+                                })
+                                setShowEditSlot(slot)
+                              }}
+                            >
+                              <Pencil size={12} />
+                            </button>
                             <button className="btn btn-danger btn-sm" onClick={() => handleDeleteSlot(slot.id)}>
                               <Trash2 size={12} />
                             </button>
@@ -354,6 +399,7 @@ export default function ParkingsPage() {
             )}
           </div>
         </div>
+      </div>
       </div>
 
       {/* ── Add Area Modal ── */}
@@ -421,17 +467,44 @@ export default function ParkingsPage() {
           </form>
         </Modal>
       )}
-    </div>
+
+      {/* ── Edit Slot Modal ── */}
+      {showEditSlot && (
+        <Modal title={`Edit Slot — ${selectedArea?.name}`} onClose={() => setShowEditSlot(null)}>
+          <form onSubmit={handleEditSlot}>
+            <FormField label="Floor" value={editSlotForm.floor} onChange={v => setEditSlotForm(f => ({ ...f, floor: v }))} placeholder="1" type="number" required />
+            <FormField label="Nama Slot" value={editSlotForm.slotName} onChange={v => setEditSlotForm(f => ({ ...f, slotName: v }))} placeholder="A-02" required />
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 600, color: 'var(--text2)' }}>Status</label>
+              <select className="input" value={editSlotForm.status} onChange={e => setEditSlotForm(f => ({ ...f, status: e.target.value }))}>
+                <option value="available">Tersedia</option>
+                <option value="occupied">Terisi</option>
+                <option value="maintenance">Maintenance</option>
+              </select>
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20 }}>
+              <button type="button" className="btn btn-ghost" onClick={() => setShowEditSlot(null)}>Batal</button>
+              <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Menyimpan...' : 'Simpan'}</button>
+            </div>
+          </form>
+        </Modal>
+      )}
+    </>
   )
 }
 
 /* ── Reusable Components ─────────────────────────────────── */
 function Modal({ title, children, onClose }) {
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)' }} />
-      <div style={{
+    <div onClick={onClose} style={{
+      position: 'fixed', inset: 0, zIndex: 200,
+      display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
+      padding: '0 10px', overflowY: 'auto',
+      background: 'rgba(0,0,0,0.6)'
+    }}>
+      <div onClick={e => e.stopPropagation()} style={{
         position: 'relative', width: '100%', maxWidth: 440,
+        margin: '40px auto',
         background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 16,
         padding: 24, animation: 'fadeUp 0.25s ease both',
       }}>

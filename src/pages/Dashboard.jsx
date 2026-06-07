@@ -5,20 +5,41 @@ import { useApp } from '../context/AppContext'
 import { parkingService, slotService } from '../services/apiService'
 
 export default function Dashboard() {
-  const { user } = useApp()
+  const { user, isSuperAdmin } = useApp()
   const navigate = useNavigate()
   const [areas, setAreas] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
 
+  const assignedAreaId =
+    user?.areaId ||
+    user?.parkingId ||
+    user?.assignedAreaId ||
+    user?.adminAreaId ||
+    user?.managedAreaId ||
+    ''
+
   const fetchData = async () => {
     setLoading(true)
     setError('')
     try {
-      // Fetch all areas
-      const res = await parkingService.getAll()
-      const list = res.data || res || []
-      const areasList = Array.isArray(list) ? list : []
+      let areasList = []
+
+      if (isSuperAdmin) {
+        // Fetch all areas for super admin
+        const res = await parkingService.getAll()
+        const list = res.data || res || []
+        areasList = Array.isArray(list) ? list : []
+      } else {
+        // Fetch only the assigned area for normal admin area / staff
+        if (assignedAreaId) {
+          const res = await parkingService.getById(assignedAreaId)
+          const areaData = res.data || res
+          if (areaData && areaData.id) {
+            areasList = [areaData]
+          }
+        }
+      }
       
       // Fetch slots for each area to calculate occupancy
       const areasWithSlots = await Promise.all(
@@ -55,7 +76,9 @@ export default function Dashboard() {
     }
   }
 
-  useEffect(() => { fetchData() }, [])
+  useEffect(() => {
+    fetchData()
+  }, [isSuperAdmin, user?.areaId, user?.parkingId, user?.managedAreaId])
 
   // Compute stats from actual data
   const totalAreas = areas.length

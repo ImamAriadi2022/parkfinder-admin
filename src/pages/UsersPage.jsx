@@ -18,7 +18,7 @@ export default function UsersPage() {
   useEffect(() => {
     const loadUsers = async () => {
       try {
-        const data = await dataService.getUsers(false);
+        const data = await dataService.getUsers(true);
         setUsers(data);
         setLoading(false);
       } catch (error) {

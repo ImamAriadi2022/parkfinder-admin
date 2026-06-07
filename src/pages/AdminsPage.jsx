@@ -15,7 +15,13 @@ export default function AdminsPage() {
     setLoading(true)
     try {
       const res = await adminService.getAll()
-      setAdmins(res.data || res || [])
+      const data = res.data || res || []
+      const mappedAdmins = data.map(admin => ({
+        ...admin,
+        id: admin.userId || admin.id || admin._id,
+        areaId: admin.managedAreaId || admin.areaId || admin.parkingId || admin.assignedAreaId || admin.adminAreaId || admin.area?.id || admin.parking?.id || ''
+      }))
+      setAdmins(mappedAdmins)
     } catch (err) {
       console.error('Gagal fetch admins:', err)
     } finally {
@@ -58,7 +64,7 @@ export default function AdminsPage() {
     e.preventDefault()
     setSaving(true)
     try {
-      const data = { name: form.name }
+      const data = { name: form.name, areaId: form.areaId }
       if (form.password) data.password = form.password
       await adminService.update(showEdit.id, data)
       setShowEdit(null)
@@ -76,24 +82,36 @@ export default function AdminsPage() {
     } catch (err) { alert(err.message) }
   }
 
+  const getAdminAreaName = (admin) => {
+    const directName = admin.areaName || admin.parkingName || admin.assignedAreaName || admin.area?.name || admin.parking?.name;
+    if (directName) return directName;
+
+    const adminAreaId = admin.areaId || admin.parkingId || admin.assignedAreaId || admin.adminAreaId || admin.area?.id || admin.parking?.id;
+    if (!adminAreaId) return '—';
+
+    const foundArea = areas.find(a => String(a.id) === String(adminAreaId));
+    return foundArea ? foundArea.name : '—';
+  }
+
   return (
-    <div className="animate-fade-up">
+    <>
+      <div className="animate-fade-up">
       <div className="page-header">
         <div>
-          <h1 className="page-title">Admin Parkir</h1>
-          <p className="page-sub">Kelola admin yang mengelola area parkir</p>
+          <h1 className="page-title">Staff Parkir</h1>
+          <p className="page-sub">Kelola petugas monitoring gedung parkir</p>
         </div>
         <div style={{ display: 'flex', gap: 8 }}>
           <button className="btn btn-ghost" onClick={fetchAdmins}><RefreshCw size={14} /> Refresh</button>
           <button className="btn btn-primary" onClick={() => { setForm({ name: '', email: '', password: '', areaId: '' }); setShowAdd(true) }}>
-            <Plus size={14} /> Tambah Admin
+            <Plus size={14} /> Tambah Staff
           </button>
         </div>
       </div>
 
       <div className="card">
         <div className="card-header">
-          <span className="card-title">Daftar Admin Parkir</span>
+          <span className="card-title">Daftar Staff Parkir</span>
           <span className="badge badge-accent">{admins.length}</span>
         </div>
         <div className="card-body" style={{ padding: 0 }}>
@@ -104,7 +122,7 @@ export default function AdminsPage() {
           ) : admins.length === 0 ? (
             <div className="empty-state">
               <div className="empty-icon">👤</div>
-              <p>Belum ada admin parkir</p>
+              <p>Belum ada staff parkir</p>
             </div>
           ) : (
             <div className="table-wrap">
@@ -113,6 +131,7 @@ export default function AdminsPage() {
                   <tr>
                     <th>Nama</th>
                     <th>Email</th>
+                    <th>Area Parkir</th>
                     <th>Aksi</th>
                   </tr>
                 </thead>
@@ -128,10 +147,14 @@ export default function AdminsPage() {
                         </div>
                       </td>
                       <td>{admin.email}</td>
+                      <td style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>
+                        {getAdminAreaName(admin)}
+                      </td>
                       <td>
                         <div style={{ display: 'flex', gap: 4 }}>
                           <button className="btn btn-ghost btn-sm" onClick={() => {
-                            setForm({ name: admin.name, email: admin.email, password: '' })
+                            const adminAreaId = admin.areaId || admin.parkingId || admin.assignedAreaId || admin.adminAreaId || admin.area?.id || admin.parking?.id || '';
+                            setForm({ name: admin.name, email: admin.email, password: '', areaId: adminAreaId })
                             setShowEdit(admin)
                           }}>
                             <Pencil size={12} /> Edit
@@ -149,10 +172,11 @@ export default function AdminsPage() {
           )}
         </div>
       </div>
+      </div>
 
       {/* Add Modal */}
       {showAdd && (
-        <Modal title="Tambah Admin Parkir" onClose={() => setShowAdd(false)}>
+        <Modal title="Tambah Staff Parkir" onClose={() => setShowAdd(false)}>
           <form onSubmit={handleAdd}>
             <FormField label="Nama" value={form.name} onChange={v => setForm(f => ({ ...f, name: v }))} required />
             <FormField label="Email" value={form.email} onChange={v => setForm(f => ({ ...f, email: v }))} type="email" required />
@@ -181,13 +205,27 @@ export default function AdminsPage() {
 
       {/* Edit Modal */}
       {showEdit && (
-        <Modal title="Edit Admin Parkir" onClose={() => setShowEdit(null)}>
+        <Modal title="Edit Staff Parkir" onClose={() => setShowEdit(null)}>
           <form onSubmit={handleEdit}>
             <FormField label="Nama" value={form.name} onChange={v => setForm(f => ({ ...f, name: v }))} required />
             <div style={{ marginBottom: 12, padding: '8px 12px', borderRadius: 8, background: 'var(--bg-hover)', fontSize: 12, color: 'var(--text3)' }}>
               Email: {form.email} (tidak bisa diubah)
             </div>
             <FormField label="Password Baru (kosongkan jika tidak diubah)" value={form.password} onChange={v => setForm(f => ({ ...f, password: v }))} type="password" />
+            <div style={{ marginBottom: 16 }}>
+              <label style={{ display: 'block', marginBottom: 6, fontSize: 12, fontWeight: 600, color: 'var(--text2)' }}>Area Parkir</label>
+              <select
+                className="input"
+                value={form.areaId}
+                onChange={e => setForm(f => ({ ...f, areaId: e.target.value }))}
+                required
+              >
+                <option value="">Pilih area parkir</option>
+                {areas.map((area) => (
+                  <option key={area.id} value={area.id}>{area.name}</option>
+                ))}
+              </select>
+            </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'flex-end', marginTop: 20 }}>
               <button type="button" className="btn btn-ghost" onClick={() => setShowEdit(null)}>Batal</button>
               <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Menyimpan...' : 'Simpan'}</button>
@@ -195,16 +233,21 @@ export default function AdminsPage() {
           </form>
         </Modal>
       )}
-    </div>
+    </>
   )
 }
 
 function Modal({ title, children, onClose }) {
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-      <div onClick={onClose} style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)' }} />
-      <div style={{
+    <div onClick={onClose} style={{
+      position: 'fixed', inset: 0, zIndex: 200,
+      display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
+      padding: '0 10px', overflowY: 'auto',
+      background: 'rgba(0,0,0,0.6)'
+    }}>
+      <div onClick={e => e.stopPropagation()} style={{
         position: 'relative', width: '100%', maxWidth: 440,
+        margin: '40px auto',
         background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 16,
         padding: 24, animation: 'fadeUp 0.25s ease both',
       }}>

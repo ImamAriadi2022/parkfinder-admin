@@ -31,7 +31,6 @@ export default function Sidebar({ open, onClose }) {
       items: [
         { path: '/staff', label: 'Staff Parkir', icon: ShieldCheck },
         { path: '/users', label: 'Data Pengguna', icon: Users },
-        { path: '/admins', label: 'Admin Parkir', icon: UserCog },
       ],
     }] : []),
     {

@@ -75,6 +75,29 @@ const INIT_STAFF = [{
 }];
 const SHIFT_OPTIONS = ['Pagi (06:00–14:00)', 'Siang (14:00–22:00)', 'Malam (22:00–06:00)'];
 
+const Field = ({
+  label,
+  id,
+  error,
+  children
+}) => (
+  <div style={{ marginBottom: 14 }}>
+    <label htmlFor={id} style={{
+      display: 'block',
+      fontSize: 13,
+      fontWeight: 600,
+      color: 'var(--text2)',
+      marginBottom: 6
+    }}>{label}</label>
+    {children}
+    {error && <div style={{
+      fontSize: 12,
+      color: 'var(--red)',
+      marginTop: 4
+    }}>⚠ {error}</div>}
+  </div>
+);
+
 /* ── Modal Tambah/Edit Staff ────────────────────────────────────────── */
 export default function StaffFormModal({
   editData,
@@ -134,28 +157,6 @@ export default function StaffFormModal({
     setLoading(false);
     setSuccess(true);
   };
-  const Field = ({
-    label,
-    id,
-    error,
-    children
-  }) => <div style={{
-    marginBottom: 14
-  }}>
-      <label htmlFor={id} style={{
-      display: 'block',
-      fontSize: 13,
-      fontWeight: 600,
-      color: 'var(--text2)',
-      marginBottom: 6
-    }}>{label}</label>
-      {children}
-      {error && <div style={{
-      fontSize: 12,
-      color: 'var(--red)',
-      marginTop: 4
-    }}>⚠ {error}</div>}
-    </div>;
   return <div style={{
     position: 'fixed',
     inset: 0,

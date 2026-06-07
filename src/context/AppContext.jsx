@@ -34,18 +34,21 @@ const buildUserFromLogin = (responseData, fallbackEmail) => {
   )
 
   const areaId = pickFirst(
+    rawUser.managedAreaId,
     rawUser.areaId,
     rawUser.parkingId,
     rawUser.assignedAreaId,
     rawUser.adminAreaId,
     rawUser.area?.id,
     rawUser.parking?.id,
+    source.managedAreaId,
     source.areaId,
     source.parkingId,
     source.assignedAreaId,
     source.adminAreaId,
     source.area?.id,
     source.parking?.id,
+    source.data?.managedAreaId,
     source.data?.areaId,
     source.data?.parkingId,
     source.data?.assignedAreaId,
