@@ -102,9 +102,11 @@ export const getUsers = async (useAPI = false) => {
 
       // 2. Ambil data seluruh reservasi dari API untuk memetakan tamu
       let apiBookings = [];
+      let bookingsFetched = false;
       try {
         const bookingsRes = await bookingService.list();
         apiBookings = bookingsRes.data || bookingsRes.reservations || bookingsRes || [];
+        bookingsFetched = true;
       } catch (err) {
         console.warn('Failed to fetch bookings in getUsers:', err);
       }
@@ -112,57 +114,71 @@ export const getUsers = async (useAPI = false) => {
       // Kumpulan ID user terdaftar untuk menyaring tamu
       const registeredUserIds = new Set(apiUsers.map(u => String(u.id)));
 
-      // Saring reservasi milik tamu (tidak memiliki userId terdaftar)
-      const guestReservations = apiBookings.filter(b => {
-        const userId = b.userId || b.user?.id || b.user?.userId;
-        return !userId || !registeredUserIds.has(String(userId));
-      });
+      let mappedGuestUsers = [];
 
-      // Kelompokkan reservasi tamu untuk membentuk objek user Tamu yang unik
-      const guestMap = new Map();
+      if (bookingsFetched && apiBookings.length > 0) {
+        // Saring reservasi milik tamu (tidak memiliki userId terdaftar)
+        const guestReservations = apiBookings.filter(b => {
+          const userId = b.userId || b.user?.id || b.user?.userId;
+          return !userId || !registeredUserIds.has(String(userId));
+        });
 
-      for (const b of guestReservations) {
-        // Unique identifier: ticketId (guest session ID) atau plate atau name
-        const guestId = b.ticketId || b.userId || b.id || `${b.name || 'Tamu'}-${b.plateNumber || '—'}`;
-        const name = b.name || b.userName || 'Tamu';
-        const phone = b.phone || b.userPhone || '—';
-        const plate = b.plateNumber || b.plate || '—';
-        const createdAt = b.createdAt || '';
-        const isActive = b.status === 'active';
+        // Kelompokkan reservasi tamu untuk membentuk objek user Tamu yang unik
+        const guestMap = new Map();
 
-        if (!guestMap.has(guestId)) {
-          guestMap.set(guestId, {
-            id: guestId,
-            name: name,
-            email: '—',
-            phone: phone,
-            plate: plate,
-            platform: 'web', // Platform web menunjukkan Tamu (guest)
-            totalBookings: 0,
-            activeBookings: 0,
-            joinDate: createdAt,
-            lastActive: createdAt,
-            status: 'active',
-          });
+        for (const b of guestReservations) {
+          // Unique identifier: ticketId (guest session ID) atau plate atau name
+          const guestId = b.ticketId || b.userId || b.id || `${b.name || 'Tamu'}-${b.plateNumber || '—'}`;
+          const name = b.name || b.userName || 'Tamu';
+          const phone = b.phone || b.userPhone || '—';
+          const plate = b.plateNumber || b.plate || '—';
+          const createdAt = b.createdAt || '';
+          const isActive = b.status === 'active';
+
+          if (!guestMap.has(guestId)) {
+            guestMap.set(guestId, {
+              id: guestId,
+              name: name,
+              email: '—',
+              phone: phone,
+              plate: plate,
+              platform: 'web', // Platform web menunjukkan Tamu (guest)
+              totalBookings: 0,
+              activeBookings: 0,
+              joinDate: createdAt,
+              lastActive: createdAt,
+              status: 'active',
+            });
+          }
+
+          const guest = guestMap.get(guestId);
+          guest.totalBookings += 1;
+          if (isActive) {
+            guest.activeBookings += 1;
+          }
+          if (createdAt && (!guest.joinDate || new Date(createdAt) < new Date(guest.joinDate))) {
+            guest.joinDate = createdAt;
+          }
+          if (createdAt && (!guest.lastActive || new Date(createdAt) > new Date(guest.lastActive))) {
+            guest.lastActive = createdAt;
+          }
         }
 
-        const guest = guestMap.get(guestId);
-        guest.totalBookings += 1;
-        if (isActive) {
-          guest.activeBookings += 1;
-        }
-        if (createdAt && (!guest.joinDate || new Date(createdAt) < new Date(guest.joinDate))) {
-          guest.joinDate = createdAt;
-        }
-        if (createdAt && (!guest.lastActive || new Date(createdAt) > new Date(guest.lastActive))) {
-          guest.lastActive = createdAt;
-        }
+        mappedGuestUsers = Array.from(guestMap.values()).map(g => ({
+          ...g,
+          status: g.activeBookings > 0 ? 'active' : 'inactive'
+        }));
+      } else {
+        // Fallback ke data mock tamu jika API gagal atau kosong
+        mappedGuestUsers = USERS.filter(u => u.platform === 'web').map(u => {
+          const matchBooking = BOOKINGS.find(b => b.userId === u.id);
+          return {
+            ...u,
+            name: matchBooking ? matchBooking.userName : (u.name || 'Tamu'),
+            phone: matchBooking ? matchBooking.userPhone : (u.phone || ''),
+          };
+        });
       }
-
-      const mappedGuestUsers = Array.from(guestMap.values()).map(g => ({
-        ...g,
-        status: g.activeBookings > 0 ? 'active' : 'inactive'
-      }));
 
       return [...apiUsers, ...mappedGuestUsers];
     } catch (error) {
@@ -170,7 +186,7 @@ export const getUsers = async (useAPI = false) => {
     }
   }
 
-  // Fallback ke data mock
+  // Fallback ke data mock jika useAPI=false
   return USERS.map(u => {
     if (u.platform === 'web') {
       const matchBooking = BOOKINGS.find(b => b.userId === u.id);
