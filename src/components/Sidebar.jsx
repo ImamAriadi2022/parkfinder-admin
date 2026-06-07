@@ -44,13 +44,21 @@ export default function Sidebar({ open, onClose }) {
   const handleLogout = async () => {
     await logout()
     navigate('/login')
-    onClose?.()
+    if (window.innerWidth <= 768) {
+      onClose?.()
+    }
+  }
+
+  const handleNavClick = () => {
+    if (window.innerWidth <= 768) {
+      onClose?.()
+    }
   }
 
   return (
     <>
       {open && (
-        <div onClick={onClose} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.55)', zIndex: 99 }} />
+        <div onClick={onClose} className="sidebar-overlay" />
       )}
       <aside className={`admin-sidebar ${open ? 'open' : ''}`}>
         {/* Logo */}
@@ -79,10 +87,10 @@ export default function Sidebar({ open, onClose }) {
                     to={item.path}
                     end={item.path === '/'}
                     className={({ isActive }) => `nav-item ${isActive ? 'active' : ''}`}
-                    onClick={onClose}
+                    onClick={handleNavClick}
                   >
                     <span className="nav-item-icon"><Icon size={16} /></span>
-                    {item.label}
+                    <span className="nav-item-label">{item.label}</span>
                   </NavLink>
                 )
               })}
@@ -97,10 +105,10 @@ export default function Sidebar({ open, onClose }) {
             padding: '10px 12px', borderRadius: 'var(--radius)',
             background: 'var(--bg-hover)', border: '1px solid var(--border)',
           }}>
-            <div className="avatar" style={{ width: 36, height: 36, fontSize: 14 }}>
+            <div className="avatar" style={{ width: 36, height: 36, fontSize: 14, flexShrink: 0 }}>
               {(user?.name || 'A').charAt(0).toUpperCase()}
             </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
+            <div className="footer-details" style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{user?.name || 'Admin'}</div>
               <div style={{ fontSize: 11, color: 'var(--text3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {isSuperAdmin ? 'Super Admin' : 'Admin Parkir'}
@@ -108,7 +116,7 @@ export default function Sidebar({ open, onClose }) {
             </div>
             <button onClick={handleLogout} title="Logout" style={{
               background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text3)',
-              display: 'flex', padding: 4, borderRadius: 6, transition: 'color 0.2s',
+              display: 'flex', padding: 4, borderRadius: 6, transition: 'color 0.2s', flexShrink: 0
             }}
               onMouseEnter={e => e.currentTarget.style.color = 'var(--red)'}
               onMouseLeave={e => e.currentTarget.style.color = 'var(--text3)'}

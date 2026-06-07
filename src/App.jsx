@@ -14,9 +14,9 @@ import './styles/index.css'
 
 /* ── Admin Layout ──────────────────────────────────────────────────── */
 function AdminLayout({ children }) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   return (
-    <div className="admin-layout">
+    <div className={`admin-layout ${sidebarOpen ? 'sidebar-open' : 'sidebar-collapsed'}`}>
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <div className="admin-main">
         <Topbar onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
