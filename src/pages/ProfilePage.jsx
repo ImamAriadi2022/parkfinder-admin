@@ -6,7 +6,7 @@ import ProfileCard from '../components/pages/ProfilePage/ProfileCard';
 import PasswordCard from '../components/pages/ProfilePage/PasswordCard';
 
 export default function ProfilePage() {
-  const { user, logout, profilePhoto, updateProfilePhoto, removeProfilePhoto, changeAdminPassword } = useApp();
+  const { user, logout, profilePhoto, updateProfilePhoto, removeProfilePhoto, changeAdminPassword, toast } = useApp();
   const navigate = useNavigate();
   const fileRef = useRef();
 
@@ -22,29 +22,53 @@ export default function ProfilePage() {
   const handlePhotoChange = e => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) { setPhotoMsg('⚠ Ukuran file maksimal 2MB'); return; }
-    if (!file.type.startsWith('image/')) { setPhotoMsg('⚠ File harus berupa gambar'); return; }
-    setPhotoLoading(true); setPhotoMsg('');
+    if (file.size > 2 * 1024 * 1024) {
+      toast.warning('Ukuran file maksimal adalah 2MB');
+      return;
+    }
+    if (!file.type.startsWith('image/')) {
+      toast.warning('File harus berupa format gambar');
+      return;
+    }
+    setPhotoLoading(true);
     const reader = new FileReader();
     reader.onload = ev => {
       updateProfilePhoto(ev.target.result);
-      setPhotoLoading(false); setPhotoMsg('✅ Foto profil berhasil diperbarui!');
-      setTimeout(() => setPhotoMsg(''), 3000);
+      setPhotoLoading(false);
+      toast.success('Foto profil berhasil diperbarui!');
     };
     reader.readAsDataURL(file);
   };
-  const handleRemovePhoto = () => { removeProfilePhoto(); setPhotoMsg('✅ Foto profil dihapus'); setTimeout(() => setPhotoMsg(''), 2500); };
+  const handleRemovePhoto = () => {
+    removeProfilePhoto();
+    toast.success('Foto profil berhasil dihapus');
+  };
 
   const handlePasswordSubmit = async e => {
-    e.preventDefault(); setPwError('');
-    if (!pwForm.current) { setPwError('Masukkan password saat ini'); return; }
-    if (pwForm.newPw.length < 6) { setPwError('Password baru minimal 6 karakter'); return; }
-    if (pwForm.newPw !== pwForm.confirm) { setPwError('Konfirmasi password tidak cocok'); return; }
-    setPwLoading(true); await new Promise(r => setTimeout(r, 700));
+    e.preventDefault();
+    setPwError('');
+    if (!pwForm.current) {
+      toast.warning('Masukkan password saat ini');
+      return;
+    }
+    if (pwForm.newPw.length < 6) {
+      toast.warning('Password baru minimal 6 karakter');
+      return;
+    }
+    if (pwForm.newPw !== pwForm.confirm) {
+      toast.warning('Konfirmasi password baru tidak cocok');
+      return;
+    }
+    setPwLoading(true);
+    await new Promise(r => setTimeout(r, 700));
     const result = changeAdminPassword(pwForm.current, pwForm.newPw);
     setPwLoading(false);
-    if (!result.ok) { setPwError(result.msg); return; }
-    setPwSuccess(true); setPwForm({ current: '', newPw: '', confirm: '' }); setTimeout(() => setPwSuccess(false), 4000);
+    if (!result.ok) {
+      toast.error(result.msg || 'Gagal memperbarui password');
+      return;
+    }
+    toast.success('Password berhasil diperbarui!');
+    setPwForm({ current: '', newPw: '', confirm: '' });
   };
 
   return (

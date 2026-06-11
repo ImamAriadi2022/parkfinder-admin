@@ -5,7 +5,7 @@ import LoginRoleToggle from '../components/pages/LoginPage/LoginRoleToggle'
 import { useApp } from '../context/AppContext'
 
 export default function LoginPage() {
-  const { login } = useApp()
+  const { login, toast } = useApp()
   const [mode, setMode] = useState('admin')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -33,6 +33,8 @@ export default function LoginPage() {
     if (!result.ok) {
       setError(result.msg)
       setLoading(false)
+    } else {
+      toast.success(`Selamat datang kembali, ${result.user.name || 'Admin'}!`)
     }
   }
 

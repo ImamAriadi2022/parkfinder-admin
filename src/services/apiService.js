@@ -125,8 +125,8 @@ export const parkingService = {
 
 // ─── Parking Slot Management ──────────────────────────────
 export const slotService = {
-  add: (areaId, floor, slotName, sensorId, status = 'available') =>
-    fetchAPI('POST', '/areas/slots', { areaId, floor, slotName, sensorId, status }),
+  add: (areaId, floor, slotName, sensorId) =>
+    fetchAPI('POST', '/areas/slots', { areaId, floor, slotName, sensorId }),
 
   // PUT /areas/slots/{slotId} — update slot status
   update: (slotId, data) =>
@@ -169,4 +169,16 @@ export const bookingService = {
   // Update reservation status (arrive/complete/cancel) - generic PATCH
   patch: (reservationId, data) =>
     fetchAPI('PATCH', `/reservations/${reservationId}`, data),
+};
+
+// ─── Scans Management ──────────────────────────────────────
+export const scansService = {
+  getAll: () =>
+    fetchAPI('GET', '/scans'),
+};
+
+// ─── Swaps Management ──────────────────────────────────────
+export const swapsService = {
+  getAll: () =>
+    fetchAPI('GET', '/swaps'),
 };

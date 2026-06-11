@@ -8,8 +8,9 @@ import Dashboard from './pages/Dashboard'
 import LoginPage from './pages/LoginPage'
 import ParkingsPage from './pages/ParkingsPage'
 import ProfilePage from './pages/ProfilePage'
-import StaffManagementPage from './pages/StaffManagementPage'
 import UsersPage from './pages/UsersPage'
+import StaffLayout from './components/StaffLayout'
+import StaffDashboard from './pages/StaffDashboard'
 import './styles/index.css'
 
 /* ── Admin Layout ──────────────────────────────────────────────────── */
@@ -42,7 +43,8 @@ function RequireSuperAdmin({ children }) {
 
 /* ── Routes ────────────────────────────────────────────────────────── */
 function AppRoutes() {
-  const { isLoggedIn } = useApp()
+  const { isLoggedIn, user } = useApp()
+  const isStaff = user?.role === 'staff'
 
   return (
     <Routes>
@@ -52,9 +54,41 @@ function AppRoutes() {
       } />
 
       {/* Shared routes (both superAdmin & admin) */}
-      <Route path="/" element={<RequireAuth><AdminLayout><Dashboard /></AdminLayout></RequireAuth>} />
-      <Route path="/parkings" element={<RequireAuth><AdminLayout><ParkingsPage /></AdminLayout></RequireAuth>} />
-      <Route path="/profile" element={<RequireAuth><AdminLayout><ProfilePage /></AdminLayout></RequireAuth>} />
+      <Route path="/" element={
+        <RequireAuth>
+          {isStaff ? (
+            <StaffLayout>
+              <StaffDashboard />
+            </StaffLayout>
+          ) : (
+            <AdminLayout>
+              <Dashboard />
+            </AdminLayout>
+          )}
+        </RequireAuth>
+      } />
+      <Route path="/parkings" element={
+        <RequireAuth>
+          {isStaff ? (
+            <Navigate to="/" replace />
+          ) : (
+            <AdminLayout>
+              <ParkingsPage />
+            </AdminLayout>
+          )}
+        </RequireAuth>
+      } />
+      <Route path="/profile" element={
+        <RequireAuth>
+          {isStaff ? (
+            <Navigate to="/" replace />
+          ) : (
+            <AdminLayout>
+              <ProfilePage />
+            </AdminLayout>
+          )}
+        </RequireAuth>
+      } />
       <Route path="/staff" element={<RequireSuperAdmin><AdminLayout><AdminsPage /></AdminLayout></RequireSuperAdmin>} />
       <Route path="/users" element={<RequireSuperAdmin><AdminLayout><UsersPage /></AdminLayout></RequireSuperAdmin>} />
 

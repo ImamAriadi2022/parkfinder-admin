@@ -1,8 +1,10 @@
 import { Pencil, Plus, RefreshCw, Trash2, X } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { adminService, parkingService } from '../services/apiService'
+import { useApp } from '../context/AppContext'
 
 export default function AdminsPage() {
+  const { toast } = useApp()
   const [admins, setAdmins] = useState([])
   const [loading, setLoading] = useState(true)
   const [areas, setAreas] = useState([])
@@ -47,7 +49,7 @@ export default function AdminsPage() {
   const handleAdd = async (e) => {
     e.preventDefault()
     if (!form.areaId) {
-      alert('Area parkir wajib dipilih.')
+      toast.warning('Area parkir wajib dipilih.')
       return
     }
     setSaving(true)
@@ -55,8 +57,9 @@ export default function AdminsPage() {
       await adminService.create(form.name, form.email, form.password, form.areaId)
       setShowAdd(false)
       setForm({ name: '', email: '', password: '', areaId: '' })
+      toast.success('Staff parkir berhasil ditambahkan!')
       fetchAdmins()
-    } catch (err) { alert(err.message) }
+    } catch (err) { toast.error(err.message || 'Gagal menambahkan staff') }
     finally { setSaving(false) }
   }
 
@@ -69,8 +72,9 @@ export default function AdminsPage() {
       await adminService.update(showEdit.id, data)
       setShowEdit(null)
       setForm({ name: '', email: '', password: '', areaId: '' })
+      toast.success('Staff parkir berhasil diperbarui!')
       fetchAdmins()
-    } catch (err) { alert(err.message) }
+    } catch (err) { toast.error(err.message || 'Gagal memperbarui staff') }
     finally { setSaving(false) }
   }
 
@@ -78,8 +82,9 @@ export default function AdminsPage() {
     if (!confirm('Yakin hapus admin ini?')) return
     try {
       await adminService.delete(adminId)
+      toast.success('Staff parkir berhasil dihapus!')
       fetchAdmins()
-    } catch (err) { alert(err.message) }
+    } catch (err) { toast.error(err.message || 'Gagal menghapus staff') }
   }
 
   const getAdminAreaName = (admin) => {

@@ -4,7 +4,7 @@ import { useApp } from '../context/AppContext'
 import { parkingService, slotService } from '../services/apiService'
 
 export default function ParkingsPage() {
-  const { user, isSuperAdmin } = useApp()
+  const { user, isSuperAdmin, toast } = useApp()
   const [areas, setAreas] = useState([])
   const [loading, setLoading] = useState(true)
   const [selectedArea, setSelectedArea] = useState(null)
@@ -107,23 +107,23 @@ export default function ParkingsPage() {
   const handleAddArea = async (e) => {
     e.preventDefault()
     if (!isSuperAdmin) {
-      alert('Hanya Super Admin yang dapat menambahkan area parkir.')
+      toast.error('Hanya Super Admin yang dapat menambahkan area parkir.')
       return
     }
     if (!areaForm.name.trim()) {
-      alert('Nama area wajib diisi.')
+      toast.warning('Nama area wajib diisi.')
       return
     }
     if (!areaForm.address.trim()) {
-      alert('Alamat wajib diisi.')
+      toast.warning('Alamat wajib diisi.')
       return
     }
     if (!areaForm.totalFloors || Number(areaForm.totalFloors) < 1) {
-      alert('Jumlah lantai wajib diisi.')
+      toast.warning('Jumlah lantai wajib diisi.')
       return
     }
     if (!areaForm.contactEmail.trim()) {
-      alert('Email kontak wajib diisi.')
+      toast.warning('Email kontak wajib diisi.')
       return
     }
     setSaving(true)
@@ -137,15 +137,16 @@ export default function ParkingsPage() {
       )
       setShowAddArea(false)
       setAreaForm({ name: '', address: '', totalFloors: '', contactEmail: '', isActive: true })
+      toast.success('Area parkir baru berhasil ditambahkan!')
       fetchAreas()
-    } catch (err) { alert(err.message) }
+    } catch (err) { toast.error(err.message || 'Gagal menambahkan area parkir') }
     finally { setSaving(false) }
   }
 
   const handleEditArea = async (e) => {
     e.preventDefault()
     if (!isSuperAdmin) {
-      alert('Hanya Super Admin yang dapat mengedit area parkir.')
+      toast.error('Hanya Super Admin yang dapat mengedit area parkir.')
       return
     }
     setSaving(true)
@@ -153,6 +154,7 @@ export default function ParkingsPage() {
       await parkingService.update(showEditArea.id, areaForm.name, areaForm.address)
       setShowEditArea(null)
       setAreaForm({ name: '', address: '', totalFloors: '', contactEmail: '', isActive: true })
+      toast.success('Informasi area parkir berhasil diperbarui!')
       fetchAreas()
       if (selectedArea?.id === showEditArea.id) {
         setSelectedArea(prev => ({
@@ -162,53 +164,55 @@ export default function ParkingsPage() {
           address: areaForm.address,
         }))
       }
-    } catch (err) { alert(err.message) }
+    } catch (err) { toast.error(err.message || 'Gagal memperbarui area parkir') }
     finally { setSaving(false) }
   }
 
   const handleDeleteArea = async (areaId) => {
     if (!isSuperAdmin) {
-      alert('Hanya Super Admin yang dapat menghapus area parkir.')
+      toast.error('Hanya Super Admin yang dapat menghapus area parkir.')
       return
     }
     if (!confirm('Yakin hapus area ini? Semua slot di dalamnya akan ikut terhapus.')) return
     try {
       await parkingService.delete(areaId)
       if (selectedArea?.id === areaId) { setSelectedArea(null); setSlots([]) }
+      toast.success('Area parkir berhasil dihapus!')
       fetchAreas()
-    } catch (err) { alert(err.message) }
+    } catch (err) { toast.error(err.message || 'Gagal menghapus area parkir') }
   }
 
   // Slot CRUD
   const handleAddSlot = async (e) => {
     e.preventDefault()
     if (!slotForm.floor) {
-      alert('Floor wajib diisi.')
+      toast.warning('Lantai (floor) wajib diisi.')
       return
     }
     if (!slotForm.slotName.trim()) {
-      alert('Nama slot wajib diisi.')
+      toast.warning('Nama slot wajib diisi.')
       return
     }
     setSaving(true)
     try {
-      await slotService.add(selectedArea.id, Number(slotForm.floor), slotForm.slotName.trim(), generatedSensorId, slotForm.status)
+      await slotService.add(selectedArea.id, Number(slotForm.floor), slotForm.slotName.trim(), generatedSensorId)
       setShowAddSlot(false)
       setSlotForm({ floor: '', slotName: '', status: 'available' })
+      toast.success('Slot parkir baru berhasil ditambahkan!')
       fetchSlots(selectedArea.id)
       fetchAreas() // refresh count
-    } catch (err) { alert(err.message) }
+    } catch (err) { toast.error(err.message || 'Gagal menambahkan slot') }
     finally { setSaving(false) }
   }
 
   const handleEditSlot = async (e) => {
     e.preventDefault()
     if (!editSlotForm.floor) {
-      alert('Floor wajib diisi.')
+      toast.warning('Lantai (floor) wajib diisi.')
       return
     }
     if (!editSlotForm.slotName.trim()) {
-      alert('Nama slot wajib diisi.')
+      toast.warning('Nama slot wajib diisi.')
       return
     }
     setSaving(true)
@@ -220,10 +224,11 @@ export default function ParkingsPage() {
       })
       setShowEditSlot(null)
       setEditSlotForm({ floor: '', slotName: '', status: 'available' })
+      toast.success('Slot parkir berhasil diperbarui!')
       fetchSlots(selectedArea.id)
       fetchAreas()
     } catch (err) {
-      alert(err.message)
+      toast.error(err.message || 'Gagal memperbarui slot')
     } finally {
       setSaving(false)
     }
@@ -233,17 +238,19 @@ export default function ParkingsPage() {
     if (!confirm('Yakin hapus slot ini?')) return
     try {
       await slotService.delete(slotId)
+      toast.success('Slot parkir berhasil dihapus!')
       fetchSlots(selectedArea.id)
       fetchAreas()
-    } catch (err) { alert(err.message) }
+    } catch (err) { toast.error(err.message || 'Gagal menghapus slot') }
   }
 
   const handleUpdateSlotStatus = async (slot, newAppStatus) => {
     try {
       await slotService.update(slot.id, newAppStatus)
+      toast.success('Status slot parkir berhasil diubah!')
       fetchSlots(selectedArea.id)
       fetchAreas()
-    } catch (err) { alert(err.message) }
+    } catch (err) { toast.error(err.message || 'Gagal mengubah status slot') }
   }
 
   const getStatusBadge = (status) => {
