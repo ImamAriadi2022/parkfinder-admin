@@ -53,45 +53,99 @@ web-admin/
 
 ---
 
-## 🖥️ Daftar Halaman Aplikasi
+## 🖥️ Analisis & Deskripsi Detail Halaman Aplikasi (Untuk Skripsi)
 
-Berikut adalah daftar nama halaman beserta penjelasan fungsinya yang tersedia di dalam sistem:
+Sistem ini didesain menggunakan **Multi-Role System** yang secara dinamis membagi alur kerja (*flow*), komponen UI, dan hak akses data antara **Super Admin** dan **Staff Gedung (Admin Area)**.
 
-### 1. Akses Halaman Utama & Peran Pengguna (Aktif)
+### 1. Halaman Login (Login Page) — Akses Publik
+*   **Fungsi Utama**: Gerbang autentikasi masuk ke sistem menggunakan pencocokan surel (*email*) dan kata sandi (*password*).
+*   **Elemen UI & Komponen**:
+    *   `LoginHeader`: Menampilkan Logo ParkFinder dan teks sambutan adaptif sesuai peran yang sedang dipilih.
+    *   `LoginRoleToggle`: Pilihan tab peran interaktif:
+        *   **🛡️ Admin Parkir** (Super Admin): Hak akses penuh mengelola semua gedung, staff, dan data user.
+        *   **👷 Staff Gedung** (Admin Area): Hak akses terbatas memantau 1 gedung parkir yang ditugaskan.
+    *   `LoginForm`: Formulir isian yang terdiri atas:
+        *   *Input Email*: validasi format email dengan ikon amplop.
+        *   *Input Password*: input sandi dengan fitur tombol *show/hide password* (mata terbuka/tertutup).
+        *   *Tombol Submit (Masuk)*: tombol aksi dengan teks dinamis "Masuk" atau "Memverifikasi..." disertai ikon *loading spinner* ketika status pengiriman data aktif.
+        *   *Alert Error Box*: kotak notifikasi kesalahan berwarna merah di atas tombol submit jika login gagal (surel salah atau password tidak valid).
+*   **Alur Sistem (Flow)**: Pengguna memilih peran lewat toggle -> memasukkan kredensial -> mengklik "Masuk" -> sistem mengirim *request* `POST /auth/login` -> jika sukses, JWT disimpan di `localStorage` sebagai `pf_token` dan detail profil di `pf_user` -> navigasi dialihkan ke rute utama `/`.
 
-Sistem membedakan tampilan halaman utama berdasarkan peran akun saat login:
+---
 
-*   **Halaman Login (Login Page)**
-    *   *Akses*: Publik (belum masuk sistem).
-    *   *Fungsi*: Halaman gerbang masuk utama. Memiliki elemen pemilih peran (*toggle role*) untuk masuk sebagai **"🛡️ Admin Parkir" (Super Admin)** atau **"👷 Staff Gedung" (Staff/Admin Area)**. Menyimpan token JWT (`pf_token`) dan data akun (`pf_user`) ke dalam `localStorage`.
-*   **Halaman Dashboard Utama (Dashboard Page) — Khusus Super Admin**
-    *   *Akses*: Super Admin (Admin Utama).
-    *   *Fungsi*: Menyajikan ringkasan visual data statistik dan grafik performa *seluruh area parkir* yang terintegrasi di sistem (tren booking, okupansi total, platform pengguna mobile/web, dan log scan harian). Rute: `/` (di bawah `AdminLayout`).
-*   **Halaman Dashboard Staff (Staff Dashboard Page) — Khusus Staff Gedung / Admin Area**
-    *   *Akses*: Staff Gedung (Petugas Lapangan).
-    *   *Fungsi*: Menyajikan monitoring kapasitas gedung secara real-time, statistik slot masuk/keluar, dan manajemen slot *khusus untuk 1 gedung parkir* yang ditugaskan kepada staff tersebut. Dilengkapi dengan navigasi notifikasi real-time dan logout tanpa sidebar. Rute: `/` (di bawah `StaffLayout`).
-*   **Halaman Manajemen Gedung Parkir (Parkings Page) — Khusus Super Admin**
-    *   *Akses*: Super Admin.
-    *   *Fungsi*: Digunakan untuk melakukan operasi CRUD (tambah, edit, hapus) area gedung parkir dan mengelola tata letak lantai beserta kapasitas slot parkir menggunakan **Slot Manager Modal**. Rute: `/parkings` (di bawah `AdminLayout`).
-*   **Halaman Manajemen Staff Parkir (Staff/Admins Page) — Khusus Super Admin**
-    *   *Akses*: Super Admin.
-    *   *Fungsi*: Mengelola pendaftaran akun petugas monitoring lapangan (Staff Parkir), menetapkan area gedung parkir yang menjadi tanggung jawab tugas staff, melakukan reset password, dan menghapus akun staff. Rute: `/staff`.
-*   **Halaman Data Pengguna (Users Page) — Khusus Super Admin**
-    *   *Akses*: Super Admin.
-    *   *Fungsi*: Memantau daftar pengemudi (pengguna aplikasi mobile) yang terdaftar di sistem beserta data nomor telepon, plat kendaraan, dan opsi hapus akun. Rute: `/users`.
-*   **Halaman Profil Akun (Profile Page) — Khusus Super Admin**
-    *   *Akses*: Super Admin.
-    *   *Fungsi*: Melihat detail profil yang sedang aktif, mengubah nama/nomor telepon, mengunggah foto profil, dan logout. Rute: `/profile`.
+### 2. Halaman Dashboard Utama (Dashboard Page) — Khusus Peran Super Admin
+*   **Fungsi Utama**: Menyajikan visualisasi data analitik dan statistik operasional keseluruhan jaringan parkir. Rute: `/` (di bawah `AdminLayout`).
+*   **Elemen UI & Komponen**:
+    *   `Page Header`: Judul halaman "Dashboard", teks dinamis nama admin, dan tombol "Refresh" untuk memperbarui data real-time dengan efek putar ikon.
+    *   `Stat Grid (KPI Cards)`: Kisi 4 kolom kartu metrik interaktif yang menampilkan:
+        *   *Total Area Parkir*: Jumlah gedung parkir yang aktif.
+        *   *Total Slot*: Akumulasi kapasitas slot seluruh gedung.
+        *   *Slot Terisi*: Jumlah slot dengan status `occupied` (merah).
+        *   *Slot Kosong*: Jumlah slot dengan status `available` (hijau).
+    *   `Occupancy Card (Okupansi per Area)`: Daftar kemajuan (*progress bar*) real-time yang menunjukkan tingkat keterisian masing-masing gedung (misal: "2/5 slot kosong"). Warna progress bar otomatis berubah: merah (okupansi >= 80%), jingga (okupansi >= 50%), dan hijau (okupansi < 50%).
+    *   `System Info Card (Informasi Sistem)`: Panel informasi samping yang menampilkan peran akun aktif ("Super Admin"), surel pengguna, persentase total keterisian parkir secara akumulatif, dan status koneksi server ("Online" dengan lampu berkedip hijau).
 
-### 2. Modul Halaman Pendukung (Pengembangan Fitur/Dev Modul)
+---
 
-Beberapa halaman tambahan telah dibuat dan tersedia di `src/pages/` untuk kebutuhan pengembangan lebih lanjut:
-*   **Halaman Daftar Pemesanan (BookingsPage.jsx)**: Halaman untuk memantau data seluruh pemesanan (reservasi) parkir dari pengguna, dilengkapi dengan fitur pencarian dan filter berdasarkan status reservasi (aktif, selesai, ditukar, atau dibatalkan).
-*   **Halaman Log Scan QR (ScansPage.jsx)**: Halaman log yang mencatat riwayat aktivitas pemindaian (scan) kode QR masuk dan keluar kendaraan secara real-time.
-*   **Halaman Tukar Slot Parkir (SwapsPage.jsx)**: Halaman untuk memantau dan mengelola permohonan pertukaran slot parkir aktif antar pengguna di area parkir.
-*   **Halaman Analitik Detail (AnalyticsPage.jsx)**: Halaman khusus untuk menyajikan analisis statistik performa gedung parkir berdasarkan periode waktu (harian, mingguan, bulanan, tahunan).
-*   **Halaman Pengaturan Sistem (SettingsPage.jsx)**: Halaman untuk melakukan konfigurasi umum sistem admin, preferensi akun, keamanan, dan pengaturan notifikasi.
-*   **Halaman Alternatif Manajemen Staff (StaffManagementPage.jsx)**: Modul alternatif atau versi terdahulu untuk manajemen staff parkir.
+### 3. Halaman Dashboard Staff (Staff Dashboard Page) — Khusus Peran Staff Gedung / Admin Area
+*   **Fungsi Utama**: Pusat monitoring real-time dan manajemen operasional khusus pada *satu area gedung parkir* yang ditugaskan kepada staff tersebut. Rute: `/` (di bawah `StaffLayout`).
+*   **Elemen UI & Komponen**:
+    *   `StaffHeader`: Salam pembuka, nama gedung penugasan (diambil dari `user.parkingName`), indikator status online, tombol "Kelola Slot", dan tombol "Edit Gedung".
+    *   `Staff KPI Cards`: Kartu status spesifik gedung: Kapasitas Total, Slot Terisi, Slot Tersedia, Booking Aktif, Scan Berhasil, dan Scan Gagal.
+    *   `Monitor Panel Tabs (Live Logs)`: Antarmuka tabulasi yang menampilkan:
+        *   *Tab Scan Logs*: Riwayat pemindaian QR masuk/keluar kendaraan (kode tiket, nama pengendara, plat, waktu scan, aksi masuk/keluar, status sukses/gagal).
+        *   *Tab Booking List*: Daftar reservasi aktif di gedung tersebut (nama, plat, slot lantai, dan durasi).
+        *   *Tab Swap Requests*: Permintaan pertukaran slot parkir antar pengemudi.
+        *   *Bar Pencarian (Search Input)*: Filter pencarian instan berdasarkan nama, plat nomor, atau kode tiket di semua tab logs.
+    *   `Modal Edit Gedung`: Formulir popup untuk memperbarui Nama dan Alamat gedung tugas.
+    *   `Modal Kelola Slot`: Kisi visual tata letak slot per lantai.
+
+---
+
+### 4. Halaman Manajemen Gedung Parkir (Parkings Page) — Khusus Peran Super Admin
+*   **Fungsi Utama**: Pengelolaan data area gedung parkir beserta layout slot parkir per lantai secara dinamis. Rute: `/parkings` (di bawah `AdminLayout`).
+*   **Elemen UI & Komponen**:
+    *   `Left Card (Daftar Area)`: Menampilkan lis seluruh gedung parkir (nama, alamat, jumlah lantai). Memiliki tombol "Edit" dan "Hapus" di setiap baris area parkir (hanya untuk Super Admin).
+    *   `Right Card (Detail Slot)`: Kisi tabel data slot parkir pada area yang sedang dipilih secara detail (nama slot, lantai, tipe kendaraan, status, dan tombol aksi ubah status *maintenance*/*active*, edit slot, dan hapus slot).
+    *   **Alur Operasional Tambah Slot Baru (Flow & UI Detail)**:
+        1. Pengguna memilih salah satu area di panel kiri, lalu mengklik tombol **"+ Tambah Slot"** pada panel kanan.
+        2. Sistem memunculkan **Add Slot Modal (Popup)** dengan form isian:
+            *   *Floor (Lantai)*: Input tipe angka (`number`) untuk lantai slot (misal: `1`).
+            *   *Nama Slot*: Input tipe teks (`text`) untuk penamaan slot (misal: `A-04`).
+            *   *Sensor ID*: Input read-only yang secara otomatis men-generate ID sensor secara real-time dengan format `SENSOR-[ID_GEDUNG]-[LANTAI]-[NAMA_SLOT]` (misal: `SENSOR-BWOJPZOA-1-A-04`).
+            *   *Status Awal*: Dropdown pilihan (`select`) status awal slot (Tersedia / Terisi / Maintenance).
+        3. Pengguna menekan tombol **"Simpan"** -> tombol berganti status menjadi loading -> sistem mengirim request `POST /areas/slots` ke API server backend (tanpa menyertakan kunci `status` karena status dikelola otomatis secara terpisah).
+        4. Jika berhasil, modal tertutup -> menampilkan *toast notification success* berwarna hijau bertuliskan "Slot parkir baru berhasil ditambahkan!" -> memanggil fungsi `fetchSlots()` untuk memuat ulang daftar slot parkir di tabel tanpa perlu mereload halaman web.
+
+---
+
+### 5. Halaman Manajemen Staff Parkir (Staff/Admins Page) — Khusus Peran Super Admin
+*   **Fungsi Utama**: Pendaftaran dan pembagian area tugas pengawasan untuk para petugas parkir lapangan. Rute: `/staff`.
+*   **Elemen UI & Komponen**:
+    *   `Header Action`: Tombol "+ Tambah Staff" dan tombol "Refresh".
+    *   `Staff Table`: Menampilkan avatar, nama staff, surel, area penugasan parkir (dikaitkan langsung ke data gedung parkir dari database), dan aksi baris:
+        *   *Edit*: Mengubah nama, kata sandi staff, atau memindahkan wilayah gedung parkir tugas.
+        *   *Hapus*: Tombol hapus dengan konfirmasi popup untuk menghapus akun secara permanen dari server.
+    *   `Staff Form Modal`: Formulir tambah/edit staff yang berisi kolom: Nama Lengkap, Surel, Kata Sandi, dan Pilihan Gedung Parkir (berupa dropdown dinamis dari hasil query daftar gedung).
+
+---
+
+### 6. Halaman Data Pengguna (Users Page) — Khusus Peran Super Admin
+*   **Fungsi Utama**: Memantau seluruh data pengguna aplikasi mobile (pengemudi) dan pengguna web (tamu/guest). Rute: `/users`.
+*   **Elemen UI & Komponen**:
+    *   `Summary Cards`: Kartu akumulasi: Total Pengguna, Pengguna Aktif, Pengguna Non-Aktif, Pengguna Mobile (Aplikasi), dan Pengguna Web (Tamu).
+    *   `Filter Bar`: Pencarian cepat nama/email/plat, filter tab tipe platform (Semua / Mobile / Web), dan filter status (Semua / Aktif / Nonaktif).
+    *   `Users Table`: Kolom nama, surel (tampil label "Tamu" jika guest), telepon, plat nomor utama, platform, tanggal bergabung, status (Aktif/Nonaktif), dan tombol "Detail".
+    *   `User Detail Modal`: Popup detail yang memuat riwayat transaksi booking parkir dan plat nomor kendaraan cadangan dari pengguna terkait.
+
+---
+
+### 7. Halaman Profil Akun (Profile Page) — Khusus Peran Super Admin
+*   **Fungsi Utama**: Pengaturan informasi pribadi pengguna dan pengaturan keamanan akun. Rute: `/profile`.
+*   **Elemen UI & Komponen**:
+    *   `ProfileCard`: Area unggah foto profil (mendukung drag & drop file gambar, batas maksimal file 2MB), tombol hapus foto profil, nama lengkap, dan peran akun.
+    *   `PasswordCard`: Formulir pembaruan keamanan kata sandi yang berisi kolom isian: Password Saat Ini, Password Baru (minimal 6 karakter), dan Konfirmasi Password Baru.
+    *   `Topbar Logout Button`: Tombol keluar yang akan menghapus sesi `localStorage` (`pf_token` dan `pf_user`) secara instan serta menampilkan toast sukses logout sebelum dialihkan kembali ke `/login`.
 
 ---
 
