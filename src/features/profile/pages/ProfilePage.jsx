@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import { Camera, Trash2, Save, CheckCircle } from 'lucide-react';
 import { useApp } from '../../../core/providers/AppProvider';
 import Avatar from '../../../shared/components/Avatar';
+import { fetchAPI } from '../../../core/api/apiClient';
 
 export default function ProfilePage() {
   const { user, profilePhoto, updateProfilePhoto, removeProfilePhoto, updateAdminProfile, toast } = useApp();
@@ -23,7 +24,7 @@ export default function ProfilePage() {
 
   const [photoLoading, setPhotoLoading] = useState(false);
 
-  const handlePhotoChange = e => {
+  const handlePhotoChange = async e => {
     const file = e.target.files?.[0];
     if (!file) return;
     if (file.size > 2 * 1024 * 1024) {
@@ -35,13 +36,25 @@ export default function ProfilePage() {
       return;
     }
     setPhotoLoading(true);
-    const reader = new FileReader();
-    reader.onload = ev => {
-      updateProfilePhoto(ev.target.result);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+
+      const res = await fetchAPI('POST', '/users/profile/photo', formData);
+      const photoUrl = res.data?.photoUrl || res.photoUrl || '';
+
+      if (photoUrl) {
+        updateProfilePhoto(photoUrl);
+        toast.success('Foto profil berhasil diunggah ke server!');
+      } else {
+        toast.error('Gagal memproses tautan foto dari server.');
+      }
+    } catch (err) {
+      console.error('Gagal upload foto ke server:', err);
+      toast.error(err.message || 'Gagal mengunggah foto profil ke server.');
+    } finally {
       setPhotoLoading(false);
-      toast.success('Foto profil berhasil diperbarui!');
-    };
-    reader.readAsDataURL(file);
+    }
   };
 
   const handleRemovePhoto = () => {

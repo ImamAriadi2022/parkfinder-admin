@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { authService } from '../../features/auth/services/auth.service';
+import { fetchAPI } from '../api/apiClient';
 
 const AuthContext = createContext();
 
@@ -117,14 +118,25 @@ export function AuthProvider({ children }) {
     try { return JSON.parse(localStorage.getItem('pf_user')) || null; } catch { return null; }
   });
   const [token, setToken] = useState(() => localStorage.getItem('pf_token') || null);
-  const [profilePhoto, setProfilePhoto] = useState(() => localStorage.getItem('pf_profile_photo') || null);
+  const [profilePhoto, setProfilePhoto] = useState(null);
   const [search, setSearch] = useState('');
+
+  // Dynamically load user-specific profile photo
+  useEffect(() => {
+    const userId = user?.id || user?.userId;
+    if (userId) {
+      setProfilePhoto(localStorage.getItem(`pf_profile_photo_${userId}`) || null);
+    } else {
+      setProfilePhoto(null);
+    }
+  }, [user]);
 
   const clearSession = () => {
     localStorage.removeItem('pf_token');
     localStorage.removeItem('pf_user');
     setToken(null);
     setUser(null);
+    setProfilePhoto(null);
   };
 
   useEffect(() => {
@@ -135,6 +147,25 @@ export function AuthProvider({ children }) {
       clearSession();
     }
   }, []);
+
+  // Sync profile photo from backend on startup/refresh
+  useEffect(() => {
+    if (!token) return;
+    const syncProfile = async () => {
+      try {
+        const profileRes = await fetchAPI('GET', '/users/profile');
+        const photoUrl = profileRes.data?.photoUrl || profileRes.photoUrl || '';
+        const userId = user?.id || user?.userId;
+        if (photoUrl && userId) {
+          localStorage.setItem(`pf_profile_photo_${userId}`, photoUrl);
+          setProfilePhoto(photoUrl);
+        }
+      } catch (err) {
+        console.warn('Gagal sinkronisasi data profil pada startup:', err);
+      }
+    };
+    syncProfile();
+  }, [token]);
 
   const isLoggedIn = !!user && !!token;
   const isSuperAdmin = detectIsSuperAdmin(user);
@@ -155,6 +186,19 @@ export function AuthProvider({ children }) {
       localStorage.setItem('pf_user', JSON.stringify(u));
       setToken(t);
       setUser(u);
+
+      // Fetch and sync photo after successful login
+      try {
+        const profileRes = await fetchAPI('GET', '/users/profile');
+        const photoUrl = profileRes.data?.photoUrl || profileRes.photoUrl || '';
+        if (photoUrl) {
+          localStorage.setItem(`pf_profile_photo_${u.userId || u.id}`, photoUrl);
+          setProfilePhoto(photoUrl);
+        }
+      } catch (err) {
+        console.warn('Gagal fetch data profil setelah login:', err);
+      }
+
       return { ok: true, user: u };
     } catch (err) {
       return { ok: false, msg: err.message || 'Login gagal' };
@@ -167,12 +211,18 @@ export function AuthProvider({ children }) {
   };
 
   const updateProfilePhoto = (photo) => {
-    localStorage.setItem('pf_profile_photo', photo);
+    const userId = user?.id || user?.userId;
+    if (userId) {
+      localStorage.setItem(`pf_profile_photo_${userId}`, photo);
+    }
     setProfilePhoto(photo);
   };
 
   const removeProfilePhoto = () => {
-    localStorage.removeItem('pf_profile_photo');
+    const userId = user?.id || user?.userId;
+    if (userId) {
+      localStorage.removeItem(`pf_profile_photo_${userId}`);
+    }
     setProfilePhoto(null);
   };
 

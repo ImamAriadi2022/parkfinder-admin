@@ -4,9 +4,7 @@ const API_BASE_URL = 'https://backend-api-services-173368161554.asia-southeast2.
 const getToken = () => localStorage.getItem('pf_token');
 
 export const fetchAPI = async (method, endpoint, body = null) => {
-  const headers = {
-    'Content-Type': 'application/json',
-  };
+  const headers = {};
 
   const token = getToken();
   if (token) {
@@ -16,7 +14,12 @@ export const fetchAPI = async (method, endpoint, body = null) => {
   const options = { method, headers };
 
   if (body) {
-    options.body = JSON.stringify(body);
+    if (body instanceof FormData) {
+      options.body = body;
+    } else {
+      headers['Content-Type'] = 'application/json';
+      options.body = JSON.stringify(body);
+    }
   }
 
   const response = await fetch(`${API_BASE_URL}${endpoint}`, options);
