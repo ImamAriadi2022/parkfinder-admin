@@ -1,27 +1,28 @@
-import { CheckCircle2, Smartphone, Globe, Users } from 'lucide-react';
+import { CheckCircle2, Smartphone, Globe } from 'lucide-react';
 
 export default function UsersSummary({ total, active, inactive, mobile, guest }) {
   const items = [
-    { label: 'Total Pengguna', value: `${total} Users`, color: 'var(--text)', icon: Users, bg: 'var(--bg-hover)' },
-    { label: 'Aktif', value: active, color: 'var(--green)', icon: CheckCircle2, bg: 'rgba(16,185,129,0.08)' },
-    { label: 'Non-Aktif', value: inactive, color: 'var(--text3)', icon: null, bg: 'var(--bg-hover)' },
-    { label: 'Mobile App', value: mobile, color: 'var(--accent)', icon: Smartphone, bg: 'var(--accent-glow)' },
-    { label: 'Web (Tamu)', value: guest, color: 'var(--accent)', icon: Globe, bg: 'var(--accent-glow)' }
+    { label: 'Total Pengguna', value: total, subText: 'Users', color: 'var(--text3)', icon: null },
+    { label: 'Aktif', value: active, color: 'var(--green)', icon: CheckCircle2 },
+    { label: 'Non-Aktif', value: inactive, color: 'var(--text3)', icon: null },
+    { label: 'Mobile App', value: mobile, color: 'var(--accent)', icon: Smartphone },
+    { label: 'Web (Tamu)', value: guest, color: 'var(--text3)', icon: Globe }
   ];
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 12, marginBottom: 20 }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 14, marginBottom: 20 }}>
       {items.map((s, i) => {
         const Icon = s.icon;
         return (
-          <div key={i} className="card animate-fade-up" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center' }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 6 }}>{s.label}</div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)' }}>{s.value}</span>
+          <div key={i} className="card" style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center' }}>
+            <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: 8 }}>
+              {s.label}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, lineHeight: 1 }}>
+              <span style={{ fontSize: 28, fontWeight: 800, color: 'var(--text)' }}>{s.value}</span>
+              {s.subText && <span style={{ fontSize: 12, fontWeight: 500, color: 'var(--text3)', marginLeft: 2 }}>{s.subText}</span>}
               {Icon && (
-                <span style={{ display: 'inline-flex', padding: 4, borderRadius: 6, background: s.bg, color: s.color }}>
-                  <Icon size={14} />
-                </span>
+                <Icon size={16} style={{ color: s.color === 'var(--green)' ? '#10B981' : (s.color === 'var(--accent)' ? '#3B82F6' : 'var(--text3)'), marginLeft: 4 }} />
               )}
             </div>
           </div>

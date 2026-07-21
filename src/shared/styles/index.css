@@ -3,28 +3,28 @@
 /* ── Design Tokens – Dark Mode ─────────────────────────────────────────── */
 :root,
 [data-theme='dark'] {
-  --bg-base:      #0F172A;
-  --bg-surface:   #1E293B;
-  --bg-card:      #1E293B;
-  --bg-card2:     #1E293B;
-  --bg-hover:     #334155;
+  --bg-base:      #0B0F19;
+  --bg-surface:   #090D16;
+  --bg-card:      #111827;
+  --bg-card2:     #1F2937;
+  --bg-hover:     #1F2937;
 
   --accent:       #3B82F6;
-  --accent2:      #60A5FA;
-  --accent-glow:  rgba(59, 130, 246, 0.15);
-  --accent2-glow: rgba(96, 165, 250, 0.15);
+  --accent2:      #2563EB;
+  --accent-glow:  rgba(37, 99, 235, 0.12);
+  --accent2-glow: rgba(96, 165, 250, 0.12);
 
   --green:        #10B981;
   --orange:       #F59E0B;
   --red:          #EF4444;
   --blue:         #3B82F6;
 
-  --text:         #F8FAFC;
-  --text2:        #CBD5E1;
-  --text3:        #94A3B8;
+  --text:         #F9FAFB;
+  --text2:        #E5E7EB;
+  --text3:        #9CA3AF;
 
-  --border:       #334155;
-  --border2:      rgba(59, 130, 246, 0.3);
+  --border:       #1F2937;
+  --border2:      rgba(59, 130, 246, 0.25);
 
   --sidebar-w:    260px;
   --topbar-h:     72px;
@@ -108,11 +108,12 @@ body {
   display: flex;
   flex-direction: column;
   transition: margin-left 0.3s ease;
+  min-width: 0;
 }
 
 .admin-topbar {
   height: var(--topbar-h);
-  background: var(--bg-surface);
+  background: var(--bg-base);
   border-bottom: 1px solid var(--border);
   display: flex;
   align-items: center;
@@ -608,8 +609,8 @@ select.input option { background: var(--bg-card); }
 }
 
 .filter-tab.active {
-  background: var(--accent-glow);
-  color: var(--accent);
+  background: var(--accent);
+  color: #FFFFFF;
 }
 
 .filter-tab:hover:not(.active) { color: var(--text); background: var(--bg-hover); }

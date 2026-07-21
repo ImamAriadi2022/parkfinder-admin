@@ -1,24 +1,17 @@
 import { useState, useRef } from 'react';
-import { Camera, Trash2, ShieldCheck, Lock, Eye, EyeOff, Save, Bell, CheckCircle } from 'lucide-react';
+import { Camera, Trash2, Save, CheckCircle } from 'lucide-react';
 import { useApp } from '../../../core/providers/AppProvider';
 import Avatar from '../../../shared/components/Avatar';
 
 export default function ProfilePage() {
-  const { user, profilePhoto, updateProfilePhoto, removeProfilePhoto, changeAdminPassword, toast } = useApp();
+  const { user, profilePhoto, updateProfilePhoto, removeProfilePhoto, updateAdminProfile, toast } = useApp();
   const fileRef = useRef();
 
   // Basic Info state
   const [basicInfo, setBasicInfo] = useState({
     name: user?.name || 'Administrator',
-    username: user?.username || 'admin.central',
-    email: user?.email || 'super@parkfinder.id',
-    phone: user?.phone || '+62 812 3456 7890'
+    email: user?.email || 'super@parkfinder.id'
   });
-
-  // Password state
-  const [pwForm, setPwForm] = useState({ current: '', newPw: '', confirm: '' });
-  const [showPw, setShowPw] = useState({ current: false, newPw: false, confirm: false });
-  const [pwLoading, setPwLoading] = useState(false);
 
   // Notification Preferences state
   const [notifs, setNotifs] = useState({
@@ -58,33 +51,8 @@ export default function ProfilePage() {
 
   const handleBasicInfoSubmit = e => {
     e.preventDefault();
+    updateAdminProfile(basicInfo.name, basicInfo.email);
     toast.success('Informasi profil berhasil disimpan!');
-  };
-
-  const handlePasswordSubmit = async e => {
-    e.preventDefault();
-    if (!pwForm.current) {
-      toast.warning('Masukkan password saat ini');
-      return;
-    }
-    if (pwForm.newPw.length < 6) {
-      toast.warning('Password baru minimal 6 karakter');
-      return;
-    }
-    if (pwForm.newPw !== pwForm.confirm) {
-      toast.warning('Konfirmasi password baru tidak cocok');
-      return;
-    }
-    setPwLoading(true);
-    await new Promise(r => setTimeout(r, 600));
-    const result = changeAdminPassword(pwForm.current, pwForm.newPw);
-    setPwLoading(false);
-    if (!result.ok) {
-      toast.error(result.msg || 'Gagal memperbarui password');
-      return;
-    }
-    toast.success('Password berhasil diperbarui!');
-    setPwForm({ current: '', newPw: '', confirm: '' });
   };
 
   const toggleNotif = key => {
@@ -92,38 +60,9 @@ export default function ProfilePage() {
     toast.success('Preferensi notifikasi diperbarui');
   };
 
-  const ToggleEye = ({ field }) => (
-    <button type="button" onClick={() => setShowPw(p => ({ ...p, [field]: !p[field] }))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text3)', display: 'flex', padding: '0 8px' }}>
-      {showPw[field] ? <EyeOff size={15} /> : <Eye size={15} />}
-    </button>
-  );
-
-  // Calculate password strength rating (0-5)
-  const getPasswordStrength = () => {
-    const pw = pwForm.newPw;
-    if (!pw) return 0;
-    let strength = 0;
-    if (pw.length >= 6) strength += 1;
-    if (pw.length >= 8) strength += 1;
-    if (/[A-Z]/.test(pw)) strength += 1;
-    if (/[0-9]/.test(pw)) strength += 1;
-    if (/[^A-Za-z0-9]/.test(pw)) strength += 1;
-    return strength;
-  };
-
-  const pwStrength = getPasswordStrength();
-  const strengthLabels = ['Sangat Lemah', 'Lemah', 'Sedang', 'Kuat', 'Sangat Kuat'];
-  const strengthColors = ['var(--red)', 'var(--red)', 'var(--orange)', 'var(--green)', 'var(--green)'];
-
   return (
     <div className="animate-fade-up">
-      {/* Page Title */}
-      <div className="page-header" style={{ marginBottom: 24 }}>
-        <div>
-          <h1 className="page-title">Edit Profile & Settings</h1>
-          <p className="page-sub">Sunting profil admin, kelola keamanan akun, dan atur preferensi sistem.</p>
-        </div>
-      </div>
+
 
       {/* Grid Layout (Screenshot 5 Style) */}
       <div className="section-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: 20, alignItems: 'flex-start' }}>
@@ -232,20 +171,7 @@ export default function ProfilePage() {
                     />
                   </div>
                   <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--text2)', marginBottom: 6 }}>USERNAME</label>
-                    <input
-                      type="text"
-                      className="input"
-                      value={basicInfo.username}
-                      onChange={e => setBasicInfo(p => ({ ...p, username: e.target.value }))}
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                  <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--text2)', marginBottom: 6 }}>EMAIL ADDRESS</label>
+                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--text2)', marginBottom: 6 }}>EMAIL</label>
                     <input
                       type="email"
                       className="input"
@@ -254,110 +180,10 @@ export default function ProfilePage() {
                       required
                     />
                   </div>
-                  <div>
-                    <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--text2)', marginBottom: 6 }}>NOMOR TELEPON</label>
-                    <input
-                      type="text"
-                      className="input"
-                      value={basicInfo.phone}
-                      onChange={e => setBasicInfo(p => ({ ...p, phone: e.target.value }))}
-                      required
-                    />
-                  </div>
                 </div>
 
                 <button type="submit" className="btn btn-primary" style={{ alignSelf: 'flex-end', minWidth: 150, justifyContent: 'center' }}>
                   <Save size={14} /> Simpan Perubahan
-                </button>
-              </form>
-            </div>
-          </div>
-
-          {/* Change Password Card */}
-          <div className="card">
-            <div className="card-header">
-              <span className="card-title">🔐 Ubah Password</span>
-            </div>
-            <div className="card-body" style={{ padding: 24 }}>
-              <form onSubmit={handlePasswordSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--text2)', marginBottom: 6 }}>PASSWORD SAAT INI</label>
-                  <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', overflow: 'hidden' }}>
-                    <Lock size={14} style={{ marginLeft: 12, color: 'var(--text3)', flexShrink: 0 }} />
-                    <input
-                      type={showPw.current ? 'text' : 'password'}
-                      className="input"
-                      placeholder="Masukkan password saat ini"
-                      value={pwForm.current}
-                      onChange={e => setPwForm(p => ({ ...p, current: e.target.value }))}
-                      style={{ border: 'none', boxShadow: 'none', flex: 1 }}
-                      required
-                    />
-                    <ToggleEye field="current" />
-                  </div>
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--text2)', marginBottom: 6 }}>PASSWORD BARU</label>
-                  <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-base)', border: `1px solid ${pwForm.newPw && pwForm.newPw.length < 6 ? 'var(--red)' : 'var(--border)'}`, borderRadius: 'var(--radius)', overflow: 'hidden' }}>
-                    <Lock size={14} style={{ marginLeft: 12, color: 'var(--text3)', flexShrink: 0 }} />
-                    <input
-                      type={showPw.newPw ? 'text' : 'password'}
-                      className="input"
-                      placeholder="Password baru (min. 6 karakter)"
-                      value={pwForm.newPw}
-                      onChange={e => setPwForm(p => ({ ...p, newPw: e.target.value }))}
-                      style={{ border: 'none', boxShadow: 'none', flex: 1 }}
-                      required
-                    />
-                    <ToggleEye field="newPw" />
-                  </div>
-
-                  {/* Password Strength Meter - 5 Bars */}
-                  {pwForm.newPw && (
-                    <div style={{ marginTop: 10 }}>
-                      <div style={{ display: 'flex', gap: 4, height: 4, width: '100%', marginBottom: 6 }}>
-                        {[1, 2, 3, 4, 5].map(index => (
-                          <div
-                            key={index}
-                            style={{
-                              flex: 1,
-                              height: '100%',
-                              borderRadius: 2,
-                              background: index <= pwStrength ? strengthColors[pwStrength - 1] : 'var(--border)'
-                            }}
-                          />
-                        ))}
-                      </div>
-                      <div style={{ fontSize: 11, color: 'var(--text3)' }}>
-                        Kekuatan Sandi: <strong style={{ color: strengthColors[pwStrength - 1] }}>{strengthLabels[pwStrength - 1] || 'Sangat Lemah'}</strong>
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                <div>
-                  <label style={{ display: 'block', fontSize: 12, fontWeight: 700, color: 'var(--text2)', marginBottom: 6 }}>KONFIRMASI PASSWORD BARU</label>
-                  <div style={{ display: 'flex', alignItems: 'center', background: 'var(--bg-base)', border: `1px solid ${pwForm.confirm && pwForm.confirm !== pwForm.newPw ? 'var(--red)' : 'var(--border)'}`, borderRadius: 'var(--radius)', overflow: 'hidden' }}>
-                    <Lock size={14} style={{ marginLeft: 12, color: 'var(--text3)', flexShrink: 0 }} />
-                    <input
-                      type={showPw.confirm ? 'text' : 'password'}
-                      className="input"
-                      placeholder="Ulangi password baru"
-                      value={pwForm.confirm}
-                      onChange={e => setPwForm(p => ({ ...p, confirm: e.target.value }))}
-                      style={{ border: 'none', boxShadow: 'none', flex: 1 }}
-                      required
-                    />
-                    <ToggleEye field="confirm" />
-                  </div>
-                  {pwForm.confirm && pwForm.confirm !== pwForm.newPw && (
-                    <div style={{ fontSize: 11, color: 'var(--red)', marginTop: 4 }}>⚠ Password tidak cocok</div>
-                  )}
-                </div>
-
-                <button type="submit" className="btn btn-primary" disabled={pwLoading} style={{ alignSelf: 'flex-end', minWidth: 150, justifyContent: 'center' }}>
-                  {pwLoading ? 'Menyimpan...' : 'Ganti Password'}
                 </button>
               </form>
             </div>

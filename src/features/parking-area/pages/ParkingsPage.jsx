@@ -271,16 +271,12 @@ export default function ParkingsPage() {
     <>
       <div className="animate-fade-up">
         {/* Header */}
-        <div className="page-header">
-          <div>
-            <h1 className="page-title">Gedung Parkir</h1>
-            <p className="page-sub">{isSuperAdmin ? 'Kelola area parkir dan slot' : 'Lihat area tugas dan kelola slot parkir'}</p>
-          </div>
+        <div className="page-header" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn btn-ghost" onClick={fetchAreas}><RefreshCw size={14} /> Refresh</button>
+            <button className="btn btn-ghost" onClick={fetchAreas} style={{ height: 38, padding: '0 16px', borderRadius: 8 }}><RefreshCw size={14} style={{ marginRight: 6 }} /> Refresh</button>
             {isSuperAdmin && (
-              <button className="btn btn-primary" onClick={() => { setAreaForm({ name: '', address: '', totalFloors: '', contactEmail: '', isActive: true }); setShowAddArea(true) }}>
-                <Plus size={14} /> Tambah Area
+              <button className="btn btn-primary" onClick={() => { setAreaForm({ name: '', address: '', totalFloors: '', contactEmail: '', isActive: true }); setShowAddArea(true) }} style={{ height: 38, padding: '0 16px', borderRadius: 8 }}>
+                <Plus size={14} style={{ marginRight: 6 }} /> Tambah Area
               </button>
             )}
           </div>

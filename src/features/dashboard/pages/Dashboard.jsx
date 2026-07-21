@@ -104,13 +104,9 @@ export default function Dashboard() {
   return (
     <div className="animate-fade-up">
       {/* Header */}
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Dashboard</h1>
-          <p className="page-sub">Selamat datang, {user?.name || 'Admin'}</p>
-        </div>
-        <button className="btn btn-ghost" onClick={fetchData} disabled={loading}>
-          <RefreshCw size={14} className={loading ? 'spin-icon' : ''} /> Refresh
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
+        <button className="btn btn-ghost" onClick={fetchData} disabled={loading} style={{ height: 38, padding: '0 16px', borderRadius: 8 }}>
+          <RefreshCw size={14} className={loading ? 'spin-icon' : ''} style={{ marginRight: 6 }} /> Refresh
         </button>
       </div>
 

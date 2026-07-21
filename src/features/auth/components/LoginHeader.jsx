@@ -1,17 +1,25 @@
-const LOGO_URL = 'https://storage.googleapis.com/parkfinderbucket/foto/logo.png';
+import { Car } from 'lucide-react';
 
-export default function LoginHeader({ mode }) {
+export default function LoginHeader() {
   return (
     <div style={{ textAlign: 'center', marginBottom: 28 }}>
-      <div style={{ marginBottom: 12 }}>
-        <img src={LOGO_URL} alt="ParkFinder" style={{ height: 48, width: 'auto', objectFit: 'contain' }} onError={e => { e.target.style.display = 'none'; }} />
+      <div style={{
+        width: 48,
+        height: 48,
+        borderRadius: 12,
+        background: 'var(--accent)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        margin: '0 auto 16px',
+        boxShadow: 'var(--shadow-glow)'
+      }}>
+        <Car size={24} color="#FFFFFF" />
       </div>
-      <h1 style={{ fontSize: 20, fontWeight: 800, color: 'var(--text)', marginBottom: 4 }}>
-        Selamat Datang, <span style={{ background: 'linear-gradient(90deg,var(--accent),var(--accent2))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-          {mode === 'admin' ? 'Admin Parkir' : 'Staff Gedung'}
-        </span>
+      <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--text)', marginBottom: 4, fontFamily: 'Inter, sans-serif' }}>
+        ParkFinder Admin
       </h1>
-      <p style={{ fontSize: 13, color: 'var(--text3)' }}>Masuk ke panel monitoring ParkFinder</p>
+      <p style={{ fontSize: 12, color: 'var(--text3)', fontWeight: 500 }}>Akses Portal Manajemen</p>
     </div>
   );
 }

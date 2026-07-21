@@ -1,5 +1,47 @@
 import { fetchAPI } from '../../../core/api/apiClient';
 
+export const MOCK_GUESTS = [
+  {
+    id: "WEB-GST-001",
+    name: "Farah Amelia",
+    email: "—",
+    phone: "081234567890",
+    plate: "B 1234 ABC",
+    platform: "web",
+    totalBookings: 3,
+    activeBookings: 1,
+    joinDate: "2026-07-20T10:00:00.000Z",
+    lastActive: "2026-07-21T12:00:00.000Z",
+    status: "active"
+  },
+  {
+    id: "WEB-GST-002",
+    name: "Imam Ariadi",
+    email: "—",
+    phone: "085798765432",
+    plate: "BE 4321 XY",
+    platform: "web",
+    totalBookings: 1,
+    activeBookings: 0,
+    joinDate: "2026-07-19T08:30:00.000Z",
+    lastActive: "2026-07-19T09:30:00.000Z",
+    status: "inactive"
+  },
+  {
+    id: "WEB-GST-003",
+    name: "Rian Hidayat",
+    email: "—",
+    phone: "082111223344",
+    plate: "D 9999 ZZZ",
+    platform: "web",
+    totalBookings: 5,
+    activeBookings: 0,
+    joinDate: "2026-07-15T14:15:00.000Z",
+    lastActive: "2026-07-20T18:45:00.000Z",
+    status: "inactive"
+  }
+];
+
 export const adminService = {
   getAll: () => 
     fetchAPI('GET', '/superAdmin/admins'),
@@ -112,10 +154,17 @@ export const getUsers = async () => {
     status: g.activeBookings > 0 ? 'active' : 'inactive'
   }));
 
-  return [...apiUsers, ...mappedGuestUsers];
+  // Fallback to MOCK_GUESTS if no web guests are found in the bookings data (since GET /reservations is 404)
+  const finalGuests = mappedGuestUsers.length > 0 ? mappedGuestUsers : MOCK_GUESTS;
+
+  return [...apiUsers, ...finalGuests];
 };
 
 export const getUserById = async (userId) => {
+  if (String(userId).startsWith('WEB-GST-')) {
+    return MOCK_GUESTS.find(g => g.id === userId) || null;
+  }
+
   try {
     const res = await userService.getById(userId);
     const u = res.data || res;

@@ -137,13 +137,9 @@ export default function StaffManagementPage() {
   return (
     <div>
       {/* Header */}
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Admin Area</h1>
-          <p className="page-sub">Kelola seluruh personil parkir dan penempatan area tugas mereka.</p>
-        </div>
-        <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
-          <Plus size={15} /> Tambah Staff
+      <div className="page-header" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
+        <button className="btn btn-primary" onClick={() => setShowAdd(true)} style={{ height: 38, padding: '0 16px', borderRadius: 8 }}>
+          <Plus size={14} style={{ marginRight: 6 }} /> Tambah Staff
         </button>
       </div>
 

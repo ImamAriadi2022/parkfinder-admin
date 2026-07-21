@@ -12,9 +12,10 @@ export default function UsersPage() {
   const { search, setSearch } = useApp();
   const [users, setUsers] = useState([]);
   const [platformFilter, setPlatform] = useState('all');
-  const [statusFilter, setStatus] = useState('all');
   const [selectedUser, setSelectedUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 3; // Displays 3 items per page matching the screenshot
 
   useEffect(() => {
     const loadUsers = async () => {
@@ -30,6 +31,11 @@ export default function UsersPage() {
     loadUsers();
   }, []);
 
+  // Reset pagination index when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [platformFilter, search]);
+
   const guestCount = users.filter(u => u.platform === 'web').length;
   const activeCount = users.filter(u => u.status === 'active').length;
   const inactiveCount = users.filter(u => u.status !== 'active').length;
@@ -37,17 +43,21 @@ export default function UsersPage() {
 
   const filtered = users.filter(u => {
     const q = search.toLowerCase();
-    const matchSearch = u.name?.toLowerCase().includes(q) || u.email?.toLowerCase().includes(q) || u.phone?.includes(q) || u.plate?.toLowerCase().includes(q) || u.id?.toLowerCase().includes(q);
+    const matchSearch =
+      u.name?.toLowerCase().includes(q) ||
+      u.email?.toLowerCase().includes(q) ||
+      u.phone?.includes(q) ||
+      u.plate?.toLowerCase().includes(q) ||
+      u.id?.toLowerCase().includes(q);
     const matchPlatform = platformFilter === 'all' || u.platform === platformFilter;
-    const matchStatus = statusFilter === 'all' || u.status === statusFilter;
-    return matchSearch && matchPlatform && matchStatus;
+    return matchSearch && matchPlatform;
   });
 
+  const paginated = filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize);
   const isGuest = u => u.platform === 'web';
 
   return (
     <div>
-      <UsersHeader />
       <UsersSummary 
         total={users.length} active={activeCount} inactive={inactiveCount} 
         mobile={mobileCount} guest={guestCount} 
@@ -56,9 +66,16 @@ export default function UsersPage() {
       <UsersFilter 
         search={search} setSearch={setSearch} 
         platformFilter={platformFilter} setPlatform={setPlatform} 
-        statusFilter={statusFilter} setStatus={setStatus} 
       />
-      <UsersTable filtered={filtered} isGuest={isGuest} setSelectedUser={setSelectedUser} />
+      <UsersTable 
+        filtered={paginated} 
+        isGuest={isGuest} 
+        setSelectedUser={setSelectedUser}
+        totalCount={filtered.length}
+        currentPage={currentPage}
+        setCurrentPage={setCurrentPage}
+        pageSize={pageSize}
+      />
       <UserDetailModal selectedUser={selectedUser} setSelectedUser={setSelectedUser} isGuest={isGuest} />
     </div>
   );

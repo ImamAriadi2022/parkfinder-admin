@@ -11,10 +11,10 @@ export default function UserDetailModal({ selectedUser, setSelectedUser, isGuest
       <div style={{ background: 'var(--bg-card)', border: '1px solid var(--border2)', borderRadius: 'var(--radius-lg)', width: '100%', maxWidth: 460, overflow: 'hidden' }} onClick={e => e.stopPropagation()}>
         <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--border)', display: 'flex', alignItems: 'center', gap: 14 }}>
           <div className="avatar avatar-lg" style={{ background: isGuest(selectedUser) ? 'linear-gradient(135deg,var(--accent2),#a855f7)' : undefined }}>
-            {isGuest(selectedUser) ? '👤' : selectedUser.name[0]}
+            {(selectedUser.name || 'T')[0].toUpperCase()}
           </div>
           <div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text)' }}>{isGuest(selectedUser) ? 'Pengguna Tamu' : selectedUser.name}</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: 'var(--text)' }}>{selectedUser.name}</div>
             <div style={{ fontSize: 13, color: 'var(--text3)' }}>{selectedUser.id}</div>
           </div>
           <button onClick={() => setSelectedUser(null)} style={{ marginLeft: 'auto', background: 'none', border: 'none', color: 'var(--text3)', cursor: 'pointer', fontSize: 20 }}>✕</button>

@@ -180,11 +180,18 @@ export function AuthProvider({ children }) {
     return { ok: true };
   };
 
+  const updateAdminProfile = (name, email) => {
+    const updated = { ...user, name, email };
+    localStorage.setItem('pf_user', JSON.stringify(updated));
+    setUser(updated);
+    return { ok: true };
+  };
+
   return (
     <AuthContext.Provider value={{
       user, token, isLoggedIn, isSuperAdmin, isAdmin, login, logout,
       profilePhoto, updateProfilePhoto, removeProfilePhoto, changeAdminPassword,
-      search, setSearch
+      updateAdminProfile, search, setSearch
     }}>
       {children}
     </AuthContext.Provider>

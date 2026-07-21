@@ -104,15 +104,11 @@ export default function AdminsPage() {
   return (
     <>
       <div className="animate-fade-up">
-        <div className="page-header">
-          <div>
-            <h1 className="page-title">Staff Parkir</h1>
-            <p className="page-sub">Kelola petugas monitoring gedung parkir</p>
-          </div>
+        <div className="page-header" style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: 20 }}>
           <div style={{ display: 'flex', gap: 8 }}>
-            <button className="btn btn-ghost" onClick={fetchAdmins}><RefreshCw size={14} /> Refresh</button>
-            <button className="btn btn-primary" onClick={() => { setForm({ name: '', email: '', password: '', areaId: '' }); setShowAdd(true) }}>
-              <Plus size={14} /> Tambah Staff
+            <button className="btn btn-ghost" onClick={fetchAdmins} style={{ height: 38, padding: '0 16px', borderRadius: 8 }}><RefreshCw size={14} style={{ marginRight: 6 }} /> Refresh</button>
+            <button className="btn btn-primary" onClick={() => { setForm({ name: '', email: '', password: '', areaId: '' }); setShowAdd(true) }} style={{ height: 38, padding: '0 16px', borderRadius: 8 }}>
+              <Plus size={14} style={{ marginRight: 6 }} /> Tambah Staff
             </button>
           </div>
         </div>
