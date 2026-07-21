@@ -118,6 +118,7 @@ export function AuthProvider({ children }) {
   });
   const [token, setToken] = useState(() => localStorage.getItem('pf_token') || null);
   const [profilePhoto, setProfilePhoto] = useState(() => localStorage.getItem('pf_profile_photo') || null);
+  const [search, setSearch] = useState('');
 
   const clearSession = () => {
     localStorage.removeItem('pf_token');
@@ -182,7 +183,8 @@ export function AuthProvider({ children }) {
   return (
     <AuthContext.Provider value={{
       user, token, isLoggedIn, isSuperAdmin, isAdmin, login, logout,
-      profilePhoto, updateProfilePhoto, removeProfilePhoto, changeAdminPassword
+      profilePhoto, updateProfilePhoto, removeProfilePhoto, changeAdminPassword,
+      search, setSearch
     }}>
       {children}
     </AuthContext.Provider>

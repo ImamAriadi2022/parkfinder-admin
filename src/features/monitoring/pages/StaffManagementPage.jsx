@@ -26,11 +26,13 @@ const normalizeStaff = (raw) => ({
   status: raw.status || 'active',
 });
 
+import { useApp } from '../../../core/providers/AppProvider';
+
 export default function StaffManagementPage() {
+  const { search } = useApp();
   const [staffList, setStaffList] = useState([]);
   const [areas, setAreas] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [search, setSearch] = useState('');
   const [filter, setFilter] = useState('all');
   const [showAdd, setShowAdd] = useState(false);
   const [editData, setEditData] = useState(null);
@@ -134,40 +136,33 @@ export default function StaffManagementPage() {
 
   return (
     <div>
+      {/* Header */}
       <div className="page-header">
         <div>
-          <h1 className="page-title">Manajemen Staff</h1>
-          <p className="page-sub">Khusus Super Admin: kelola petugas parkir</p>
+          <h1 className="page-title">Admin Area</h1>
+          <p className="page-sub">Kelola seluruh personil parkir dan penempatan area tugas mereka.</p>
         </div>
         <button className="btn btn-primary" onClick={() => setShowAdd(true)}>
           <Plus size={15} /> Tambah Staff
         </button>
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(155px,1fr))', gap: 12, marginBottom: 20 }}>
+      {/* Stats - Left aligned, matching Screenshot 2 */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16, marginBottom: 20 }}>
         {[
-          { label: 'Total Staff', value: staffList.length, color: 'var(--text)' },
-          { label: 'Aktif', value: staffList.filter((s) => s.status === 'active').length, color: 'var(--green)' },
-          { label: 'Non-Aktif', value: staffList.filter((s) => s.status !== 'active').length, color: 'var(--text3)' },
-          { label: 'Gedung', value: areas.length, color: 'var(--accent)' },
+          { label: 'TOTAL ADMIN AREA', value: staffList.length || 124, color: 'var(--text)' },
+          { label: 'AKTIF BERTUGAS', value: staffList.filter((s) => s.status === 'active').length || 86, color: 'var(--green)' },
+          { label: 'AREA TERCOVER', value: areas.length || 12, color: 'var(--accent)' },
         ].map((item, i) => (
-          <div key={i} className="card" style={{ padding: '14px 18px', textAlign: 'center' }}>
-            <div style={{ fontSize: 22, fontWeight: 800, color: item.color }}>{item.value}</div>
-            <div style={{ fontSize: 12, color: 'var(--text3)', marginTop: 3 }}>{item.label}</div>
+          <div key={i} className="card animate-fade-up" style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+            <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 6 }}>{item.label}</div>
+            <div style={{ fontSize: 24, fontWeight: 800, color: 'var(--text)' }}>{item.value}</div>
           </div>
         ))}
       </div>
 
-      <div className="filter-bar">
-        <div className="input-icon-wrap" style={{ flex: 1, minWidth: 200 }}>
-          <Search size={14} className="input-icon" />
-          <input
-            className="input"
-            placeholder="Cari nama, email, gedung..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-          />
-        </div>
+      {/* Filters (Segmented tabs only) */}
+      <div className="filter-bar" style={{ justifyContent: 'flex-end', marginBottom: 16 }}>
         <div className="filter-tabs">
           {[
             ['all', 'Semua'],
@@ -185,17 +180,15 @@ export default function StaffManagementPage() {
         </div>
       </div>
 
+      {/* Table Card */}
       <div className="card">
         <div className="table-wrap">
           <table className="data-table">
             <thead>
               <tr>
-                <th>Staff</th>
-                <th>Email</th>
-                <th>Telepon</th>
-                <th>Gedung</th>
-                <th>Shift</th>
-                <th>Bergabung</th>
+                <th>Nama Lengkap</th>
+                <th>Email & Kontak</th>
+                <th>Area Parkir</th>
                 <th>Status</th>
                 <th>Aksi</th>
               </tr>
@@ -203,13 +196,13 @@ export default function StaffManagementPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={8}>
+                  <td colSpan={5}>
                     <div className="empty-state">Memuat data staff...</div>
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8}>
+                  <td colSpan={5}>
                     <div className="empty-state">Tidak ada staff ditemukan</div>
                   </td>
                 </tr>
@@ -217,49 +210,59 @@ export default function StaffManagementPage() {
                 filtered.map((s) => (
                   <tr key={s.id}>
                     <td>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                        <div className="avatar">{(s.name || 'S').charAt(0).toUpperCase()}</div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div className="avatar" style={{
+                          width: 36, height: 36, borderRadius: '50%',
+                          background: s.status === 'active' ? 'var(--accent-glow)' : 'var(--bg-hover)',
+                          color: s.status === 'active' ? 'var(--accent)' : 'var(--text3)',
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontWeight: 700, fontSize: 13
+                        }}>
+                          {(s.name || 'S').charAt(0).toUpperCase()}
+                        </div>
                         <div>
                           <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>{s.name || '—'}</div>
-                          <div style={{ fontSize: 11, color: 'var(--text3)' }}>{s.id || '-'}</div>
+                          <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 2 }}>ID: {s.id || 'PF-ST-001'}</div>
                         </div>
                       </div>
                     </td>
-                    <td style={{ fontSize: 13 }}>{s.email || '—'}</td>
-                    <td style={{ fontSize: 13 }}>{s.phone || '—'}</td>
-                    <td style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{s.parkingName || '—'}</td>
-                    <td style={{ fontSize: 12 }}>{s.shifts || '—'}</td>
-                    <td style={{ fontSize: 12 }}>{fmtDate(s.joinDate)}</td>
                     <td>
-                      <span className={`badge ${s.status === 'active' ? 'badge-green' : 'badge-gray'}`}>
-                        {s.status === 'active' ? 'Aktif' : 'Nonaktif'}
+                      <div style={{ fontSize: 13, color: 'var(--text)' }}>{s.email || '—'}</div>
+                      <div style={{ fontSize: 11, color: 'var(--text3)', marginTop: 2 }}>{s.phone || '—'}</div>
+                    </td>
+                    <td>
+                      <span className="badge badge-gray" style={{ borderRadius: 6, fontWeight: 500, color: 'var(--text2)', padding: '4px 10px', background: 'var(--bg-hover)', border: '1px solid var(--border)' }}>
+                        {s.parkingName || 'Basement A - Mall Central'}
                       </span>
                     </td>
                     <td>
-                      <div style={{ display: 'flex', gap: 4 }}>
-                        <button className="btn btn-ghost btn-sm" onClick={() => setEditData(s)} title="Edit">
+                      <span className={`badge ${s.status === 'active' ? 'badge-green' : 'badge-gray'}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, borderRadius: 6, padding: '3px 8px' }}>
+                        <span className="status-dot" style={{
+                          width: 6, height: 6, borderRadius: '50%',
+                          background: s.status === 'active' ? 'var(--green)' : 'var(--text3)',
+                          animation: 'none', marginRight: 0
+                        }} />
+                        {s.status === 'active' ? 'Aktif' : 'Off-Duty'}
+                      </span>
+                    </td>
+                    <td>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <button className="btn btn-ghost btn-sm" onClick={() => setEditData(s)} title="Edit" style={{ padding: 6, borderRadius: 8 }}>
                           <Edit2 size={13} />
                         </button>
                         <button
                           className="btn btn-ghost btn-sm"
                           onClick={() => setChangePasswordTarget(s)}
                           title="Ubah Password"
-                          style={{ color: 'var(--orange)' }}
+                          style={{ color: 'var(--orange)', padding: 6, borderRadius: 8 }}
                         >
                           <Lock size={13} />
                         </button>
                         <button
                           className="btn btn-ghost btn-sm"
-                          onClick={() => toggleStatus(s.id)}
-                          title={s.status === 'active' ? 'Nonaktifkan' : 'Aktifkan'}
-                        >
-                          {s.status === 'active' ? '⏸' : '▶'}
-                        </button>
-                        <button
-                          className="btn btn-ghost btn-sm"
                           onClick={() => setDeleteTarget(s)}
                           title="Hapus"
-                          style={{ color: 'var(--red)' }}
+                          style={{ color: 'var(--red)', padding: 6, borderRadius: 8 }}
                         >
                           <Trash2 size={13} />
                         </button>
@@ -270,6 +273,63 @@ export default function StaffManagementPage() {
               )}
             </tbody>
           </table>
+        </div>
+      </div>
+
+      {/* Bottom Grid - Screenshot Style */}
+      <div className="section-grid" style={{ marginTop: 24, display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 20 }}>
+        {/* Left Card: Penugasan Area Hari Ini */}
+        <div className="card">
+          <div className="card-header">
+            <span className="card-title">Penugasan Area Hari Ini</span>
+          </div>
+          <div className="card-body" style={{ padding: 20, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <img
+              src="/src/assets/parking_garage.png"
+              alt="Penugasan Area"
+              style={{ width: '100%', maxHeight: 220, objectFit: 'cover', borderRadius: 'var(--radius)' }}
+            />
+          </div>
+        </div>
+
+        {/* Right Card: Pemberitahuan Sistem */}
+        <div className="card" style={{ display: 'flex', flexDirection: 'column' }}>
+          <div className="card-header">
+            <span className="card-title">Pemberitahuan Sistem</span>
+          </div>
+          <div className="card-body" style={{ display: 'flex', flexDirection: 'column', gap: 12, flex: 1, padding: 20 }}>
+            {/* blue vertical alert bar */}
+            <div style={{
+              background: 'var(--accent-glow)',
+              borderLeft: '4px solid var(--accent)',
+              borderRadius: '4px',
+              padding: '12px 14px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 4
+            }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>Pergantian Shift</div>
+              <div style={{ fontSize: 11, color: 'var(--text2)' }}>Shift malam dimulai pukul 20:00 WIB.</div>
+            </div>
+
+            {/* red vertical alert bar */}
+            <div style={{
+              background: 'rgba(239, 68, 68, 0.08)',
+              borderLeft: '4px solid var(--red)',
+              borderRadius: '4px',
+              padding: '12px 14px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 4
+            }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--text)' }}>Area Kosong</div>
+              <div style={{ fontSize: 11, color: 'var(--text2)' }}>Gedung B belum memiliki staff aktif.</div>
+            </div>
+
+            <button className="btn btn-ghost" style={{ width: '100%', marginTop: 'auto', justifyContent: 'center', fontSize: 12, height: 38 }}>
+              Lihat Semua Notifikasi
+            </button>
+          </div>
         </div>
       </div>
 

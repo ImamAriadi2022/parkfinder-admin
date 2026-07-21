@@ -1,10 +1,26 @@
+import { Info } from 'lucide-react';
+
 export default function UsersInfoBox() {
   return (
-    <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, background: 'var(--accent2-glow)', border: '1px solid rgba(123,97,255,0.2)', borderRadius: 'var(--radius)', padding: '12px 16px', marginBottom: 16, fontSize: 13 }}>
-      <span style={{ fontSize: 18, flexShrink: 0 }}>ℹ️</span>
-      <span style={{ color: 'var(--text2)', lineHeight: 1.5 }}>
-        Pengguna <strong style={{ color: 'var(--accent2)' }}>Web User</strong> menggunakan sistem tanpa login — ditampilkan sebagai <strong style={{ color: 'var(--accent2)' }}>Tamu</strong>. Data yang tersimpan hanya plat kendaraan dari form booking.
-      </span>
+    <div style={{
+      display: 'flex',
+      alignItems: 'flex-start',
+      gap: 12,
+      background: 'var(--accent-glow)',
+      border: '1px solid var(--border)',
+      borderLeft: '4px solid var(--accent)',
+      borderRadius: 'var(--radius)',
+      padding: '14px 18px',
+      marginBottom: 20,
+      fontSize: 13
+    }}>
+      <Info size={18} style={{ color: 'var(--accent)', flexShrink: 0, marginTop: 1 }} />
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+        <div style={{ fontWeight: 700, color: 'var(--text)' }}>Mengenai Web Users/Tamu</div>
+        <div style={{ color: 'var(--text2)', lineHeight: 1.5, fontSize: 12 }}>
+          Web user adalah pengguna tidak terdaftar yang menggunakan website tamu untuk memesan slot parkir secara langsung tanpa akun. Data pengguna ini disimpan berdasarkan nomor plat kendaraan saat booking.
+        </div>
+      </div>
     </div>
   );
 }

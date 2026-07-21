@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useApp } from '../../../core/providers/AppProvider';
 import UserDetailModal from '../components/UserDetailModal';
 import UsersFilter from '../components/UsersFilter';
 import UsersHeader from '../components/UsersHeader';
@@ -8,8 +9,8 @@ import UsersTable from '../components/UsersTable';
 import { getUsers } from '../services/user.service';
 
 export default function UsersPage() {
+  const { search, setSearch } = useApp();
   const [users, setUsers] = useState([]);
-  const [search, setSearch] = useState('');
   const [platformFilter, setPlatform] = useState('all');
   const [statusFilter, setStatus] = useState('all');
   const [selectedUser, setSelectedUser] = useState(null);

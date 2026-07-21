@@ -1,66 +1,66 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
 
-/* ── Design Tokens – Dark Mode (default) ───────────────────────────────── */
+/* ── Design Tokens – Dark Mode ─────────────────────────────────────────── */
 :root,
 [data-theme='dark'] {
-  --bg-base:      #080c14;
-  --bg-surface:   #0d1220;
-  --bg-card:      #111827;
-  --bg-card2:     #161e2e;
-  --bg-hover:     #1a2336;
+  --bg-base:      #0F172A;
+  --bg-surface:   #1E293B;
+  --bg-card:      #1E293B;
+  --bg-card2:     #1E293B;
+  --bg-hover:     #334155;
 
-  --accent:       #00D2FF;
-  --accent2:      #7B61FF;
-  --accent-glow:  rgba(0,210,255,0.18);
-  --accent2-glow: rgba(123,97,255,0.18);
+  --accent:       #3B82F6;
+  --accent2:      #60A5FA;
+  --accent-glow:  rgba(59, 130, 246, 0.15);
+  --accent2-glow: rgba(96, 165, 250, 0.15);
 
-  --green:        #22c55e;
-  --orange:       #f59e0b;
-  --red:          #ef4444;
-  --blue:         #3b82f6;
+  --green:        #10B981;
+  --orange:       #F59E0B;
+  --red:          #EF4444;
+  --blue:         #3B82F6;
 
-  --text:         #f1f5f9;
-  --text2:        #94a3b8;
-  --text3:        #64748b;
+  --text:         #F8FAFC;
+  --text2:        #CBD5E1;
+  --text3:        #94A3B8;
 
-  --border:       rgba(255,255,255,0.07);
-  --border2:      rgba(0,210,255,0.25);
+  --border:       #334155;
+  --border2:      rgba(59, 130, 246, 0.3);
 
   --sidebar-w:    260px;
-  --topbar-h:     64px;
-  --radius:       12px;
-  --radius-lg:    16px;
-  --shadow:       0 4px 24px rgba(0,0,0,0.4);
-  --shadow-glow:  0 0 32px rgba(0,210,255,0.12);
+  --topbar-h:     72px;
+  --radius:       10px;
+  --radius-lg:    12px;
+  --shadow:       0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -1px rgba(0,0,0,0.06);
+  --shadow-glow:  0 0 20px rgba(59, 130, 246, 0.15);
 }
 
-/* ── Light Mode ──────────────────────────────────────────────────────────── */
+/* ── Light Mode (Screenshots Style) ─────────────────────────────────────── */
 [data-theme='light'] {
-  --bg-base:      #f0f4f8;
-  --bg-surface:   #ffffff;
-  --bg-card:      #ffffff;
-  --bg-card2:     #f8fafc;
-  --bg-hover:     #eef2f7;
+  --bg-base:      #F3F4F6;
+  --bg-surface:   #FFFFFF;
+  --bg-card:      #FFFFFF;
+  --bg-card2:     #F9FAFB;
+  --bg-hover:     #F3F4F6;
 
-  --accent:       #0099cc;
-  --accent2:      #6041d4;
-  --accent-glow:  rgba(0,153,204,0.12);
-  --accent2-glow: rgba(96,65,212,0.12);
+  --accent:       #1A56DB;
+  --accent2:      #2563EB;
+  --accent-glow:  #EBF5FF;
+  --accent2-glow: #EBF5FF;
 
-  --green:        #16a34a;
-  --orange:       #d97706;
-  --red:          #dc2626;
-  --blue:         #2563eb;
+  --green:        #10B981;
+  --orange:       #F59E0B;
+  --red:          #EF4444;
+  --blue:         #1A56DB;
 
-  --text:         #0f172a;
-  --text2:        #475569;
-  --text3:        #94a3b8;
+  --text:         #111928;
+  --text2:        #4B5563;
+  --text3:        #9CA3AF;
 
-  --border:       rgba(0,0,0,0.08);
-  --border2:      rgba(0,153,204,0.3);
+  --border:       #E5E7EB;
+  --border2:      #3B82F6;
 
-  --shadow:       0 4px 24px rgba(0,0,0,0.1);
-  --shadow-glow:  0 0 32px rgba(0,153,204,0.1);
+  --shadow:       0 1px 3px 0 rgba(0,0,0,0.1), 0 1px 2px 0 rgba(0,0,0,0.06);
+  --shadow-glow:  0 0 15px rgba(26, 86, 219, 0.08);
 }
 
 /* ── Reset ──────────────────────────────────────────────────────────────── */
@@ -184,7 +184,8 @@ body {
 .nav-item.active {
   background: var(--accent-glow);
   color: var(--accent);
-  border-color: var(--border2);
+  font-weight: 700;
+  border-color: transparent;
 }
 
 .nav-item-icon {
@@ -377,14 +378,13 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  color: var(--bg-base);
+  background: var(--accent);
+  color: #FFFFFF;
   border: none;
 }
 .btn-primary:hover {
-  opacity: 0.88;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 16px rgba(0,210,255,0.3);
+  background: var(--accent2);
+  opacity: 0.92;
 }
 
 .btn-ghost {
@@ -855,3 +855,15 @@ select.input option { background: var(--bg-card); }
 }
 
 .empty-icon { font-size: 48px; margin-bottom: 16px; opacity: 0.4; }
+
+@media (min-width: 769px) {
+  .topbar-search {
+    display: flex !important;
+  }
+}
+
+@media (max-width: 600px) {
+  .topbar-user-info {
+    display: none !important;
+  }
+}

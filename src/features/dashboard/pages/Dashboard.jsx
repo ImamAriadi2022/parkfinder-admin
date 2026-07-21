@@ -1,4 +1,4 @@
-import { AlertTriangle, Car, MapPin, ParkingCircle, RefreshCw } from 'lucide-react';
+import { AlertTriangle, Car, MapPin, LayoutGrid, ShieldCheck, RefreshCw } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useApp } from '../../../core/providers/AppProvider';
@@ -89,10 +89,10 @@ export default function Dashboard() {
   const occupancyPct = totalSlots > 0 ? Math.round((occupiedSlots / totalSlots) * 100) : 0;
 
   const stats = [
-    { label: 'Total Area Parkir', value: totalAreas, icon: MapPin, color: 'var(--accent)', bg: 'var(--accent-glow)' },
-    { label: 'Total Slot', value: totalSlots, icon: ParkingCircle, color: 'var(--blue)', bg: 'rgba(59,130,246,0.12)' },
-    { label: 'Slot Terisi', value: occupiedSlots, icon: Car, color: 'var(--orange)', bg: 'rgba(245,158,11,0.12)' },
-    { label: 'Slot Kosong', value: availableSlots, icon: Car, color: 'var(--green)', bg: 'rgba(34,197,94,0.12)' },
+    { label: 'TOTAL AREA PARKIR', value: totalAreas, icon: MapPin, color: 'var(--accent)', bg: 'var(--accent-glow)' },
+    { label: 'TOTAL SLOT', value: totalSlots, icon: LayoutGrid, color: 'var(--accent)', bg: 'var(--accent-glow)' },
+    { label: 'SLOT TERISI', value: occupiedSlots, icon: Car, color: 'var(--red)', bg: 'rgba(239,68,68,0.08)' },
+    { label: 'SLOT KOSONG', value: availableSlots, icon: ShieldCheck, color: 'var(--accent)', bg: 'var(--accent-glow)' },
   ];
 
   const getOccupancyColor = (pct) => {
@@ -125,17 +125,38 @@ export default function Dashboard() {
         </div>
       )}
 
-      {/* Stats */}
-      <div className="stat-grid">
+      {/* Stats - Screenshot Style (Split Left/Right) */}
+      <div className="stat-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 16, marginBottom: 24 }}>
         {stats.map((s, i) => {
           const Icon = s.icon;
           return (
-            <div key={i} className={`stat-card animate-fade-up delay-${i + 1}`}>
-              <div className="stat-card-icon" style={{ background: s.bg, color: s.color }}>
+            <div key={i} className="card animate-fade-up" style={{
+              padding: '20px 24px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius-lg)'
+            }}>
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 700, color: 'var(--text3)', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 6 }}>{s.label}</div>
+                <div style={{ fontSize: 28, fontWeight: 800, color: s.color === 'var(--red)' ? 'var(--red)' : 'var(--text)' }}>
+                  {loading ? '—' : s.value}
+                </div>
+              </div>
+              <div style={{
+                width: 44,
+                height: 44,
+                borderRadius: 12,
+                background: s.bg,
+                color: s.color,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
                 <Icon size={20} />
               </div>
-              <div className="stat-card-value" style={{ color: s.color }}>{loading ? '—' : s.value}</div>
-              <div className="stat-card-label">{s.label}</div>
             </div>
           );
         })}
@@ -172,7 +193,7 @@ export default function Dashboard() {
                   <div key={area.id} className="parking-row">
                     <div className="parking-row-name">
                       <div className="name">{area.name}</div>
-                      <div className="address">{avail}/{total} slot kosong</div>
+                      <div className="address">{pct}% ({used}/{total} Slots)</div>
                     </div>
                     <div className="parking-row-bar">
                       <div className="progress">

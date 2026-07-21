@@ -9,10 +9,8 @@ import {
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useApp } from '../../core/providers/AppProvider';
 
-const LOGO_URL = 'https://storage.googleapis.com/parkfinderbucket/foto/logo.png';
-
 export default function Sidebar({ open, onClose }) {
-  const { user, logout, isSuperAdmin } = useApp();
+  const { logout, isSuperAdmin, setSearch } = useApp();
   const navigate = useNavigate();
 
   const NAV_ITEMS = [
@@ -26,7 +24,7 @@ export default function Sidebar({ open, onClose }) {
     ...(isSuperAdmin ? [{
       section: 'Manajemen',
       items: [
-        { path: '/staff', label: 'Staff Parkir', icon: ShieldCheck },
+        { path: '/staff', label: 'Admin Area', icon: ShieldCheck },
         { path: '/users', label: 'Data Pengguna', icon: Users },
       ],
     }] : []),
@@ -47,6 +45,7 @@ export default function Sidebar({ open, onClose }) {
   };
 
   const handleNavClick = () => {
+    setSearch?.('');
     if (window.innerWidth <= 768) {
       onClose?.();
     }
@@ -58,17 +57,25 @@ export default function Sidebar({ open, onClose }) {
         <div onClick={onClose} className="sidebar-overlay" />
       )}
       <aside className={`admin-sidebar ${open ? 'open' : ''}`}>
-        {/* Logo */}
-        <div className="sidebar-logo">
-          <img
-            src={LOGO_URL}
-            alt="ParkFinder"
-            style={{ height: 36, width: 'auto', objectFit: 'contain', maxWidth: 140 }}
-            onError={e => { e.target.style.display = 'none'; }}
-          />
-          <div style={{ fontSize: 10, color: 'var(--text3)', fontWeight: 600, marginTop: 2, letterSpacing: '0.5px' }}>
-            {isSuperAdmin ? 'SUPER ADMIN' : 'ADMIN PARKIR'}
+        {/* Logo / Brand (Screenshot Style) */}
+        <div className="sidebar-logo" style={{ padding: '24px 20px', borderBottom: '1px solid var(--border)', display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{
+              width: 24,
+              height: 24,
+              borderRadius: 6,
+              background: 'var(--accent)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#FFFFFF',
+              fontWeight: 800,
+              fontSize: 14,
+              lineHeight: 1
+            }}>P</div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: 'var(--accent)', fontFamily: 'Inter, sans-serif' }}>ParkFinder Admin</div>
           </div>
+          <div style={{ fontSize: 9, fontWeight: 700, color: 'var(--text3)', letterSpacing: '1px', textTransform: 'uppercase', paddingLeft: 32 }}>MANAGEMENT SUITE</div>
         </div>
 
         {/* Nav */}
@@ -95,32 +102,37 @@ export default function Sidebar({ open, onClose }) {
           ))}
         </nav>
 
-        {/* Footer */}
-        <div className="sidebar-footer">
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 10,
-            padding: '10px 12px', borderRadius: 'var(--radius)',
-            background: 'var(--bg-hover)', border: '1px solid var(--border)',
-          }}>
-            <div className="avatar" style={{ width: 36, height: 36, fontSize: 14, flexShrink: 0 }}>
-              {(user?.name || 'A').charAt(0).toUpperCase()}
-            </div>
-            <div className="footer-details" style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--text)' }}>{user?.name || 'Admin'}</div>
-              <div style={{ fontSize: 11, color: 'var(--text3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {isSuperAdmin ? 'Super Admin' : 'Admin Parkir'}
-              </div>
-            </div>
-            <button onClick={handleLogout} title="Logout" style={{
-              background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text3)',
-              display: 'flex', padding: 4, borderRadius: 6, transition: 'color 0.2s', flexShrink: 0
+        {/* Footer (Clean Logout Button only - Screenshot Style) */}
+        <div className="sidebar-footer" style={{ borderTop: '1px solid var(--border)', padding: '16px 10px' }}>
+          <button
+            onClick={handleLogout}
+            className="nav-item"
+            style={{
+              width: '100%',
+              background: 'none',
+              border: 'none',
+              textAlign: 'left',
+              color: 'var(--red)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 10,
+              padding: '10px 12px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontWeight: 500,
+              borderRadius: 'var(--radius)',
+              transition: 'all 0.2s'
             }}
-              onMouseEnter={e => e.currentTarget.style.color = 'var(--red)'}
-              onMouseLeave={e => e.currentTarget.style.color = 'var(--text3)'}
-            >
-              <LogOut size={15} />
-            </button>
-          </div>
+            onMouseEnter={e => {
+              e.currentTarget.style.background = 'rgba(239, 68, 68, 0.08)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background = 'none';
+            }}
+          >
+            <span className="nav-item-icon" style={{ color: 'var(--red)' }}><LogOut size={16} /></span>
+            <span className="nav-item-label" style={{ fontWeight: 600 }}>Logout</span>
+          </button>
         </div>
       </aside>
     </>
